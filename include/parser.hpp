@@ -32,8 +32,8 @@
 
 
 /**
- ** \file /Users/__nya__/Desktop/C-interpreter/include/parser.hpp
- ** Define the  CINT::PreProcess ::parser class.
+ ** \file parser.hpp
+ ** Define the yy::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
@@ -42,10 +42,17 @@
 // especially those whose name start with YY_ or yy_.  They are
 // private implementation details that can be changed or removed.
 
-#ifndef YY_YY_USERS_NYA_DESKTOP_C_INTERPRETER_INCLUDE_PARSER_HPP_INCLUDED
-# define YY_YY_USERS_NYA_DESKTOP_C_INTERPRETER_INCLUDE_PARSER_HPP_INCLUDED
+#ifndef YY_YY_PARSER_HPP_INCLUDED
+# define YY_YY_PARSER_HPP_INCLUDED
+// "%code requires" blocks.
+#line 8 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 
+  # include <string>
+  class driver;
 
+#line 54 "parser.hpp"
+
+# include <cassert>
 # include <cstdlib> // std::abort
 # include <iostream>
 # include <stdexcept>
@@ -88,7 +95,12 @@
 #else
 # define YY_CONSTEXPR
 #endif
-
+# include "location.hh"
+#include <typeinfo>
+#ifndef YY_ASSERT
+# include <cassert>
+# define YY_ASSERT assert
+#endif
 
 
 #ifndef YY_ATTRIBUTE_PURE
@@ -174,18 +186,17 @@
 
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 0
+# define YYDEBUG 1
 #endif
 
-#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
-namespace  CINT { namespace PreProcess  {
-#line 183 "/Users/__nya__/Desktop/C-interpreter/include/parser.hpp"
+namespace yy {
+#line 194 "parser.hpp"
 
 
 
 
   /// A Bison parser.
-  class  Parser 
+  class parser
   {
   public:
 #ifdef YYSTYPE
@@ -208,12 +219,15 @@ namespace  CINT { namespace PreProcess  {
     /// Empty construction.
     value_type () YY_NOEXCEPT
       : yyraw_ ()
+      , yytypeid_ (YY_NULLPTR)
     {}
 
     /// Construct and fill.
     template <typename T>
     value_type (YY_RVREF (T) t)
+      : yytypeid_ (&typeid (T))
     {
+      YY_ASSERT (sizeof (T) <= size);
       new (yyas_<T> ()) T (YY_MOVE (t));
     }
 
@@ -226,7 +240,9 @@ namespace  CINT { namespace PreProcess  {
 
     /// Destruction, allowed only if empty.
     ~value_type () YY_NOEXCEPT
-    {}
+    {
+      YY_ASSERT (!yytypeid_);
+    }
 
 # if 201103L <= YY_CPLUSPLUS
     /// Instantiate a \a T in here from \a t.
@@ -234,6 +250,9 @@ namespace  CINT { namespace PreProcess  {
     T&
     emplace (U&&... u)
     {
+      YY_ASSERT (!yytypeid_);
+      YY_ASSERT (sizeof (T) <= size);
+      yytypeid_ = & typeid (T);
       return *new (yyas_<T> ()) T (std::forward <U>(u)...);
     }
 # else
@@ -242,6 +261,9 @@ namespace  CINT { namespace PreProcess  {
     T&
     emplace ()
     {
+      YY_ASSERT (!yytypeid_);
+      YY_ASSERT (sizeof (T) <= size);
+      yytypeid_ = & typeid (T);
       return *new (yyas_<T> ()) T ();
     }
 
@@ -250,6 +272,9 @@ namespace  CINT { namespace PreProcess  {
     T&
     emplace (const T& t)
     {
+      YY_ASSERT (!yytypeid_);
+      YY_ASSERT (sizeof (T) <= size);
+      yytypeid_ = & typeid (T);
       return *new (yyas_<T> ()) T (t);
     }
 # endif
@@ -277,6 +302,9 @@ namespace  CINT { namespace PreProcess  {
     T&
     as () YY_NOEXCEPT
     {
+      YY_ASSERT (yytypeid_);
+      YY_ASSERT (*yytypeid_ == typeid (T));
+      YY_ASSERT (sizeof (T) <= size);
       return *yyas_<T> ();
     }
 
@@ -285,6 +313,9 @@ namespace  CINT { namespace PreProcess  {
     const T&
     as () const YY_NOEXCEPT
     {
+      YY_ASSERT (yytypeid_);
+      YY_ASSERT (*yytypeid_ == typeid (T));
+      YY_ASSERT (sizeof (T) <= size);
       return *yyas_<T> ();
     }
 
@@ -300,6 +331,8 @@ namespace  CINT { namespace PreProcess  {
     void
     swap (self_type& that) YY_NOEXCEPT
     {
+      YY_ASSERT (yytypeid_);
+      YY_ASSERT (*yytypeid_ == *that.yytypeid_);
       std::swap (as<T> (), that.as<T> ());
     }
 
@@ -344,6 +377,7 @@ namespace  CINT { namespace PreProcess  {
     destroy ()
     {
       as<T> ().~T ();
+      yytypeid_ = YY_NULLPTR;
     }
 
   private:
@@ -375,9 +409,12 @@ namespace  CINT { namespace PreProcess  {
     /// An auxiliary type to compute the largest semantic type.
     union union_type
     {
-      // INTEGER
-      // term
+      // "number"
+      // exp
       char dummy1[sizeof (int)];
+
+      // "identifier"
+      char dummy2[sizeof (std::string)];
     };
 
     /// The size of the largest semantic type.
@@ -391,25 +428,34 @@ namespace  CINT { namespace PreProcess  {
       /// A buffer large enough to store any of the semantic values.
       char yyraw_[size];
     };
+
+    /// Whether the content is built: if defined, the name of the stored type.
+    const std::type_info *yytypeid_;
   };
 
 #endif
     /// Backward compatibility (Bison 3.8).
     typedef value_type semantic_type;
 
+    /// Symbol locations.
+    typedef location location_type;
 
     /// Syntax errors thrown from user actions.
     struct syntax_error : std::runtime_error
     {
-      syntax_error (const std::string& m)
+      syntax_error (const location_type& l, const std::string& m)
         : std::runtime_error (m)
+        , location (l)
       {}
 
       syntax_error (const syntax_error& s)
         : std::runtime_error (s.what ())
+        , location (s.location)
       {}
 
       ~syntax_error () YY_NOEXCEPT YY_NOTHROW;
+
+      location_type location;
     };
 
     /// Token kinds.
@@ -417,11 +463,19 @@ namespace  CINT { namespace PreProcess  {
     {
       enum token_kind_type
       {
-        YYEMPTY = -2,
-    YYEOF = 0,                     // YYEOF
-    YYerror = 256,                 // error
-    YYUNDEF = 257,                 // "invalid token"
-    INTEGER = 258                  // INTEGER
+        TOK_YYEMPTY = -2,
+    TOK_YYEOF = 0,                 // "end of file"
+    TOK_YYerror = 1,               // error
+    TOK_YYUNDEF = 2,               // "invalid token"
+    TOK_ASSIGN = 3,                // ":="
+    TOK_MINUS = 4,                 // "-"
+    TOK_PLUS = 5,                  // "+"
+    TOK_STAR = 6,                  // "*"
+    TOK_SLASH = 7,                 // "/"
+    TOK_LPAREN = 8,                // "("
+    TOK_RPAREN = 9,                // ")"
+    TOK_IDENTIFIER = 10,           // "identifier"
+    TOK_NUMBER = 11                // "number"
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -438,14 +492,25 @@ namespace  CINT { namespace PreProcess  {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 4, ///< Number of tokens.
+        YYNTOKENS = 12, ///< Number of tokens.
         S_YYEMPTY = -2,
-        S_YYEOF = 0,                             // YYEOF
+        S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
         S_YYUNDEF = 2,                           // "invalid token"
-        S_INTEGER = 3,                           // INTEGER
-        S_YYACCEPT = 4,                          // $accept
-        S_term = 5                               // term
+        S_ASSIGN = 3,                            // ":="
+        S_MINUS = 4,                             // "-"
+        S_PLUS = 5,                              // "+"
+        S_STAR = 6,                              // "*"
+        S_SLASH = 7,                             // "/"
+        S_LPAREN = 8,                            // "("
+        S_RPAREN = 9,                            // ")"
+        S_IDENTIFIER = 10,                       // "identifier"
+        S_NUMBER = 11,                           // "number"
+        S_YYACCEPT = 12,                         // $accept
+        S_unit = 13,                             // unit
+        S_assignments = 14,                      // assignments
+        S_assignment = 15,                       // assignment
+        S_exp = 16                               // exp
       };
     };
 
@@ -460,7 +525,7 @@ namespace  CINT { namespace PreProcess  {
     /// Expects its Base type to provide access to the symbol kind
     /// via kind ().
     ///
-    /// Provide access to semantic value.
+    /// Provide access to semantic value and location.
     template <typename Base>
     struct basic_symbol : Base
     {
@@ -470,6 +535,7 @@ namespace  CINT { namespace PreProcess  {
       /// Default constructor.
       basic_symbol () YY_NOEXCEPT
         : value ()
+        , location ()
       {}
 
 #if 201103L <= YY_CPLUSPLUS
@@ -477,12 +543,17 @@ namespace  CINT { namespace PreProcess  {
       basic_symbol (basic_symbol&& that)
         : Base (std::move (that))
         , value ()
+        , location (std::move (that.location))
       {
         switch (this->kind ())
     {
-      case symbol_kind::S_INTEGER: // INTEGER
-      case symbol_kind::S_term: // term
+      case symbol_kind::S_NUMBER: // "number"
+      case symbol_kind::S_exp: // exp
         value.move< int > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_IDENTIFIER: // "identifier"
+        value.move< std::string > (std::move (that.value));
         break;
 
       default:
@@ -497,24 +568,42 @@ namespace  CINT { namespace PreProcess  {
 
       /// Constructors for typed symbols.
 #if 201103L <= YY_CPLUSPLUS
-      basic_symbol (typename Base::kind_type t)
+      basic_symbol (typename Base::kind_type t, location_type&& l)
         : Base (t)
+        , location (std::move (l))
       {}
 #else
-      basic_symbol (typename Base::kind_type t)
+      basic_symbol (typename Base::kind_type t, const location_type& l)
         : Base (t)
+        , location (l)
       {}
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
-      basic_symbol (typename Base::kind_type t, int&& v)
+      basic_symbol (typename Base::kind_type t, int&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
+        , location (std::move (l))
       {}
 #else
-      basic_symbol (typename Base::kind_type t, const int& v)
+      basic_symbol (typename Base::kind_type t, const int& v, const location_type& l)
         : Base (t)
         , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::string&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::string& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
       {}
 #endif
 
@@ -542,9 +631,13 @@ namespace  CINT { namespace PreProcess  {
         // Value type destructor.
 switch (yykind)
     {
-      case symbol_kind::S_INTEGER: // INTEGER
-      case symbol_kind::S_term: // term
+      case symbol_kind::S_NUMBER: // "number"
+      case symbol_kind::S_exp: // exp
         value.template destroy< int > ();
+        break;
+
+      case symbol_kind::S_IDENTIFIER: // "identifier"
+        value.template destroy< std::string > ();
         break;
 
       default:
@@ -554,14 +647,11 @@ switch (yykind)
         Base::clear ();
       }
 
-#if YYDEBUG || 0
       /// The user-facing name of this symbol.
       const char *name () const YY_NOEXCEPT
       {
-        return  Parser ::symbol_name (this->kind ());
+        return parser::symbol_name (this->kind ());
       }
-#endif // #if YYDEBUG || 0
-
 
       /// Backward compatibility (Bison 3.6).
       symbol_kind_type type_get () const YY_NOEXCEPT;
@@ -574,6 +664,9 @@ switch (yykind)
 
       /// The semantic value.
       value_type value;
+
+      /// The location.
+      location_type location;
 
     private:
 #if YY_CPLUSPLUS < 201103L
@@ -636,32 +729,53 @@ switch (yykind)
 
       /// Constructor for valueless symbols, and symbols from each type.
 #if 201103L <= YY_CPLUSPLUS
-      symbol_type (int tok)
-        : super_type (token_kind_type (tok))
+      symbol_type (int tok, location_type l)
+        : super_type (token_kind_type (tok), std::move (l))
 #else
-      symbol_type (int tok)
-        : super_type (token_kind_type (tok))
+      symbol_type (int tok, const location_type& l)
+        : super_type (token_kind_type (tok), l)
 #endif
-      {}
+      {
+#if !defined _MSC_VER || defined __clang__
+        YY_ASSERT (tok == token::TOK_YYEOF
+                   || (token::TOK_YYerror <= tok && tok <= token::TOK_RPAREN));
+#endif
+      }
 #if 201103L <= YY_CPLUSPLUS
-      symbol_type (int tok, int v)
-        : super_type (token_kind_type (tok), std::move (v))
+      symbol_type (int tok, int v, location_type l)
+        : super_type (token_kind_type (tok), std::move (v), std::move (l))
 #else
-      symbol_type (int tok, const int& v)
-        : super_type (token_kind_type (tok), v)
+      symbol_type (int tok, const int& v, const location_type& l)
+        : super_type (token_kind_type (tok), v, l)
 #endif
-      {}
+      {
+#if !defined _MSC_VER || defined __clang__
+        YY_ASSERT (tok == token::TOK_NUMBER);
+#endif
+      }
+#if 201103L <= YY_CPLUSPLUS
+      symbol_type (int tok, std::string v, location_type l)
+        : super_type (token_kind_type (tok), std::move (v), std::move (l))
+#else
+      symbol_type (int tok, const std::string& v, const location_type& l)
+        : super_type (token_kind_type (tok), v, l)
+#endif
+      {
+#if !defined _MSC_VER || defined __clang__
+        YY_ASSERT (tok == token::TOK_IDENTIFIER);
+#endif
+      }
     };
 
     /// Build a parser object.
-     Parser  ();
-    virtual ~ Parser  ();
+    parser (driver& drv_yyarg);
+    virtual ~parser ();
 
 #if 201103L <= YY_CPLUSPLUS
     /// Non copyable.
-     Parser  (const  Parser &) = delete;
+    parser (const parser&) = delete;
     /// Non copyable.
-     Parser & operator= (const  Parser &) = delete;
+    parser& operator= (const parser&) = delete;
 #endif
 
     /// Parse.  An alias for parse ().
@@ -687,94 +801,247 @@ switch (yykind)
 #endif
 
     /// Report a syntax error.
+    /// \param loc    where the syntax error is found.
     /// \param msg    a description of the syntax error.
-    virtual void error (const std::string& msg);
+    virtual void error (const location_type& loc, const std::string& msg);
 
     /// Report a syntax error.
     void error (const syntax_error& err);
 
-#if YYDEBUG || 0
     /// The user-facing name of the symbol whose (internal) number is
     /// YYSYMBOL.  No bounds checking.
     static const char *symbol_name (symbol_kind_type yysymbol);
-#endif // #if YYDEBUG || 0
-
 
     // Implementation of make_symbol for each token kind.
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_YYEOF ()
+      make_YYEOF (location_type l)
       {
-        return symbol_type (token::YYEOF);
+        return symbol_type (token::TOK_YYEOF, std::move (l));
       }
 #else
       static
       symbol_type
-      make_YYEOF ()
+      make_YYEOF (const location_type& l)
       {
-        return symbol_type (token::YYEOF);
+        return symbol_type (token::TOK_YYEOF, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_YYerror ()
+      make_YYerror (location_type l)
       {
-        return symbol_type (token::YYerror);
+        return symbol_type (token::TOK_YYerror, std::move (l));
       }
 #else
       static
       symbol_type
-      make_YYerror ()
+      make_YYerror (const location_type& l)
       {
-        return symbol_type (token::YYerror);
+        return symbol_type (token::TOK_YYerror, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_YYUNDEF ()
+      make_YYUNDEF (location_type l)
       {
-        return symbol_type (token::YYUNDEF);
+        return symbol_type (token::TOK_YYUNDEF, std::move (l));
       }
 #else
       static
       symbol_type
-      make_YYUNDEF ()
+      make_YYUNDEF (const location_type& l)
       {
-        return symbol_type (token::YYUNDEF);
+        return symbol_type (token::TOK_YYUNDEF, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_INTEGER (int v)
+      make_ASSIGN (location_type l)
       {
-        return symbol_type (token::INTEGER, std::move (v));
+        return symbol_type (token::TOK_ASSIGN, std::move (l));
       }
 #else
       static
       symbol_type
-      make_INTEGER (const int& v)
+      make_ASSIGN (const location_type& l)
       {
-        return symbol_type (token::INTEGER, v);
+        return symbol_type (token::TOK_ASSIGN, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_MINUS (location_type l)
+      {
+        return symbol_type (token::TOK_MINUS, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_MINUS (const location_type& l)
+      {
+        return symbol_type (token::TOK_MINUS, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_PLUS (location_type l)
+      {
+        return symbol_type (token::TOK_PLUS, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_PLUS (const location_type& l)
+      {
+        return symbol_type (token::TOK_PLUS, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_STAR (location_type l)
+      {
+        return symbol_type (token::TOK_STAR, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_STAR (const location_type& l)
+      {
+        return symbol_type (token::TOK_STAR, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_SLASH (location_type l)
+      {
+        return symbol_type (token::TOK_SLASH, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_SLASH (const location_type& l)
+      {
+        return symbol_type (token::TOK_SLASH, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_LPAREN (location_type l)
+      {
+        return symbol_type (token::TOK_LPAREN, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_LPAREN (const location_type& l)
+      {
+        return symbol_type (token::TOK_LPAREN, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_RPAREN (location_type l)
+      {
+        return symbol_type (token::TOK_RPAREN, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_RPAREN (const location_type& l)
+      {
+        return symbol_type (token::TOK_RPAREN, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_IDENTIFIER (std::string v, location_type l)
+      {
+        return symbol_type (token::TOK_IDENTIFIER, std::move (v), std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_IDENTIFIER (const std::string& v, const location_type& l)
+      {
+        return symbol_type (token::TOK_IDENTIFIER, v, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_NUMBER (int v, location_type l)
+      {
+        return symbol_type (token::TOK_NUMBER, std::move (v), std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_NUMBER (const int& v, const location_type& l)
+      {
+        return symbol_type (token::TOK_NUMBER, v, l);
       }
 #endif
 
+
+    class context
+    {
+    public:
+      context (const parser& yyparser, const symbol_type& yyla);
+      const symbol_type& lookahead () const YY_NOEXCEPT { return yyla_; }
+      symbol_kind_type token () const YY_NOEXCEPT { return yyla_.kind (); }
+      const location_type& location () const YY_NOEXCEPT { return yyla_.location; }
+
+      /// Put in YYARG at most YYARGN of the expected tokens, and return the
+      /// number of tokens stored in YYARG.  If YYARG is null, return the
+      /// number of expected tokens (guaranteed to be less than YYNTOKENS).
+      int expected_tokens (symbol_kind_type yyarg[], int yyargn) const;
+
+    private:
+      const parser& yyparser_;
+      const symbol_type& yyla_;
+    };
 
   private:
 #if YY_CPLUSPLUS < 201103L
     /// Non copyable.
-     Parser  (const  Parser &);
+    parser (const parser&);
     /// Non copyable.
-     Parser & operator= (const  Parser &);
+    parser& operator= (const parser&);
 #endif
 
+    /// Check the lookahead yytoken.
+    /// \returns  true iff the token will be eventually shifted.
+    bool yy_lac_check_ (symbol_kind_type yytoken) const;
+    /// Establish the initial context if no initial context currently exists.
+    /// \returns  true iff the token will be eventually shifted.
+    bool yy_lac_establish_ (symbol_kind_type yytoken);
+    /// Discard any previous initial lookahead context because of event.
+    /// \param event  the event which caused the lookahead to be discarded.
+    ///               Only used for debbuging output.
+    void yy_lac_discard_ (const char* event);
 
     /// Stored state numbers (used for stacks).
     typedef signed char state_type;
 
+    /// The arguments of the error message.
+    int yy_syntax_error_arguments_ (const context& yyctx,
+                                    symbol_kind_type yyarg[], int yyargn) const;
+
+    /// Generate an error message.
+    /// \param yyctx     the context in which the error occurred.
+    virtual std::string yysyntax_error_ (const context& yyctx) const;
     /// Compute post-reduction state.
     /// \param yystate   the current state
     /// \param yysym     the nonterminal to push on the stack
@@ -796,10 +1063,6 @@ switch (yykind)
     /// are valid, yet not members of the token_kind_type enum.
     static symbol_kind_type yytranslate_ (int t) YY_NOEXCEPT;
 
-#if YYDEBUG || 0
-    /// For a symbol, its name in clear.
-    static const char* const yytname_[];
-#endif // #if YYDEBUG || 0
 
 
     // Tables.
@@ -1043,6 +1306,15 @@ switch (yykind)
 
     /// The stack.
     stack_type yystack_;
+    /// The stack for LAC.
+    /// Logically, the yy_lac_stack's lifetime is confined to the function
+    /// yy_lac_check_. We just store it as a member of this class to hold
+    /// on to the memory and to avoid frequent reallocations.
+    /// Since yy_lac_check_ is const, this member must be mutable.
+    mutable std::vector<state_type> yylac_stack_;
+    /// Whether an initial LAC context was established.
+    bool yy_lac_established_;
+
 
     /// Push a new state on the stack.
     /// \param m    a debug message to display
@@ -1065,74 +1337,40 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 1,     ///< Last index in yytable_.
-      yynnts_ = 2,  ///< Number of nonterminal symbols.
+      yylast_ = 26,     ///< Last index in yytable_.
+      yynnts_ = 5,  ///< Number of nonterminal symbols.
       yyfinal_ = 3 ///< Termination state number.
     };
 
 
+    // User arguments.
+    driver& drv;
 
   };
 
   inline
-   Parser ::symbol_kind_type
-   Parser ::yytranslate_ (int t) YY_NOEXCEPT
+  parser::symbol_kind_type
+  parser::yytranslate_ (int t) YY_NOEXCEPT
   {
-    // YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to
-    // TOKEN-NUM as returned by yylex.
-    static
-    const signed char
-    translate_table[] =
-    {
-       0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     1,     2,     3
-    };
-    // Last valid token kind.
-    const int code_max = 258;
-
-    if (t <= 0)
-      return symbol_kind::S_YYEOF;
-    else if (t <= code_max)
-      return static_cast <symbol_kind_type> (translate_table[t]);
-    else
-      return symbol_kind::S_YYUNDEF;
+    return static_cast<symbol_kind_type> (t);
   }
 
   // basic_symbol.
   template <typename Base>
-   Parser ::basic_symbol<Base>::basic_symbol (const basic_symbol& that)
+  parser::basic_symbol<Base>::basic_symbol (const basic_symbol& that)
     : Base (that)
     , value ()
+    , location (that.location)
   {
     switch (this->kind ())
     {
-      case symbol_kind::S_INTEGER: // INTEGER
-      case symbol_kind::S_term: // term
+      case symbol_kind::S_NUMBER: // "number"
+      case symbol_kind::S_exp: // exp
         value.copy< int > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_IDENTIFIER: // "identifier"
+        value.copy< std::string > (YY_MOVE (that.value));
         break;
 
       default:
@@ -1145,8 +1383,8 @@ switch (yykind)
 
 
   template <typename Base>
-   Parser ::symbol_kind_type
-   Parser ::basic_symbol<Base>::type_get () const YY_NOEXCEPT
+  parser::symbol_kind_type
+  parser::basic_symbol<Base>::type_get () const YY_NOEXCEPT
   {
     return this->kind ();
   }
@@ -1154,38 +1392,43 @@ switch (yykind)
 
   template <typename Base>
   bool
-   Parser ::basic_symbol<Base>::empty () const YY_NOEXCEPT
+  parser::basic_symbol<Base>::empty () const YY_NOEXCEPT
   {
     return this->kind () == symbol_kind::S_YYEMPTY;
   }
 
   template <typename Base>
   void
-   Parser ::basic_symbol<Base>::move (basic_symbol& s)
+  parser::basic_symbol<Base>::move (basic_symbol& s)
   {
     super_type::move (s);
     switch (this->kind ())
     {
-      case symbol_kind::S_INTEGER: // INTEGER
-      case symbol_kind::S_term: // term
+      case symbol_kind::S_NUMBER: // "number"
+      case symbol_kind::S_exp: // exp
         value.move< int > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_IDENTIFIER: // "identifier"
+        value.move< std::string > (YY_MOVE (s.value));
         break;
 
       default:
         break;
     }
 
+    location = YY_MOVE (s.location);
   }
 
   // by_kind.
   inline
-   Parser ::by_kind::by_kind () YY_NOEXCEPT
+  parser::by_kind::by_kind () YY_NOEXCEPT
     : kind_ (symbol_kind::S_YYEMPTY)
   {}
 
 #if 201103L <= YY_CPLUSPLUS
   inline
-   Parser ::by_kind::by_kind (by_kind&& that) YY_NOEXCEPT
+  parser::by_kind::by_kind (by_kind&& that) YY_NOEXCEPT
     : kind_ (that.kind_)
   {
     that.clear ();
@@ -1193,12 +1436,12 @@ switch (yykind)
 #endif
 
   inline
-   Parser ::by_kind::by_kind (const by_kind& that) YY_NOEXCEPT
+  parser::by_kind::by_kind (const by_kind& that) YY_NOEXCEPT
     : kind_ (that.kind_)
   {}
 
   inline
-   Parser ::by_kind::by_kind (token_kind_type t) YY_NOEXCEPT
+  parser::by_kind::by_kind (token_kind_type t) YY_NOEXCEPT
     : kind_ (yytranslate_ (t))
   {}
 
@@ -1206,40 +1449,39 @@ switch (yykind)
 
   inline
   void
-   Parser ::by_kind::clear () YY_NOEXCEPT
+  parser::by_kind::clear () YY_NOEXCEPT
   {
     kind_ = symbol_kind::S_YYEMPTY;
   }
 
   inline
   void
-   Parser ::by_kind::move (by_kind& that)
+  parser::by_kind::move (by_kind& that)
   {
     kind_ = that.kind_;
     that.clear ();
   }
 
   inline
-   Parser ::symbol_kind_type
-   Parser ::by_kind::kind () const YY_NOEXCEPT
+  parser::symbol_kind_type
+  parser::by_kind::kind () const YY_NOEXCEPT
   {
     return kind_;
   }
 
 
   inline
-   Parser ::symbol_kind_type
-   Parser ::by_kind::type_get () const YY_NOEXCEPT
+  parser::symbol_kind_type
+  parser::by_kind::type_get () const YY_NOEXCEPT
   {
     return this->kind ();
   }
 
 
-#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
-} } //  CINT::PreProcess 
-#line 1241 "/Users/__nya__/Desktop/C-interpreter/include/parser.hpp"
+} // yy
+#line 1483 "parser.hpp"
 
 
 
 
-#endif // !YY_YY_USERS_NYA_DESKTOP_C_INTERPRETER_INCLUDE_PARSER_HPP_INCLUDED
+#endif // !YY_YY_PARSER_HPP_INCLUDED

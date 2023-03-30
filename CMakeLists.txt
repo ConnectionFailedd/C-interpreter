@@ -13,7 +13,8 @@ include(CPack)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}-std=c++17")
 
-execute_process(COMMAND opt/homebrew/opt/flex/bin/flex -o ${CMAKE_CURRENT_SOURCE_DIR}/parser_cpp/lexer.cpp ${CMAKE_CURRENT_SOURCE_DIR}/parser/lexer.ll)
-execute_process(COMMAND opt/homebrew/opt/bison/bin/bison --header=${CMAKE_CURRENT_SOURCE_DIR}/include/parser.hpp -o ${CMAKE_CURRENT_SOURCE_DIR}/parser_cpp/parser.cpp ${CMAKE_CURRENT_SOURCE_DIR}/parser/parser.yy)
-
+include_directories(include)
+add_subdirectory(parser)
 add_subdirectory(parser_cpp)
+
+target_link_libraries(CINT PARSER)

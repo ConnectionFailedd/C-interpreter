@@ -41,6 +41,12 @@
 #include "parser.hpp"
 
 
+// Unqualified %code blocks.
+#line 18 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+
+# include "driver.hpp"
+
+#line 50 "parser.cpp"
 
 
 #ifndef YY_
@@ -65,6 +71,25 @@
 # endif
 #endif
 
+#define YYRHSLOC(Rhs, K) ((Rhs)[K].location)
+/* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
+   If N is 0, then set CURRENT to the empty location which ends
+   the previous symbol: RHS[0] (always defined).  */
+
+# ifndef YYLLOC_DEFAULT
+#  define YYLLOC_DEFAULT(Current, Rhs, N)                               \
+    do                                                                  \
+      if (N)                                                            \
+        {                                                               \
+          (Current).begin  = YYRHSLOC (Rhs, 1).begin;                   \
+          (Current).end    = YYRHSLOC (Rhs, N).end;                     \
+        }                                                               \
+      else                                                              \
+        {                                                               \
+          (Current).begin = (Current).end = YYRHSLOC (Rhs, 0).end;      \
+        }                                                               \
+    while (false)
+# endif
 
 
 // Enable debugging if requested.
@@ -112,24 +137,25 @@
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
-namespace  CINT { namespace PreProcess  {
-#line 118 "/Users/__nya__/Desktop/C-interpreter/parser_cpp/parser.cpp"
+namespace yy {
+#line 142 "parser.cpp"
 
   /// Build a parser object.
-   Parser :: Parser  ()
+  parser::parser (driver& drv_yyarg)
 #if YYDEBUG
     : yydebug_ (false),
-      yycdebug_ (&std::cerr)
+      yycdebug_ (&std::cerr),
 #else
-
+    :
 #endif
+      yy_lac_established_ (false),
+      drv (drv_yyarg)
   {}
 
-   Parser ::~ Parser  ()
+  parser::~parser ()
   {}
 
-   Parser ::syntax_error::~syntax_error () YY_NOEXCEPT YY_NOTHROW
+  parser::syntax_error::~syntax_error () YY_NOEXCEPT YY_NOTHROW
   {}
 
   /*---------.
@@ -139,33 +165,33 @@ namespace  CINT { namespace PreProcess  {
 
 
   // by_state.
-   Parser ::by_state::by_state () YY_NOEXCEPT
+  parser::by_state::by_state () YY_NOEXCEPT
     : state (empty_state)
   {}
 
-   Parser ::by_state::by_state (const by_state& that) YY_NOEXCEPT
+  parser::by_state::by_state (const by_state& that) YY_NOEXCEPT
     : state (that.state)
   {}
 
   void
-   Parser ::by_state::clear () YY_NOEXCEPT
+  parser::by_state::clear () YY_NOEXCEPT
   {
     state = empty_state;
   }
 
   void
-   Parser ::by_state::move (by_state& that)
+  parser::by_state::move (by_state& that)
   {
     state = that.state;
     that.clear ();
   }
 
-   Parser ::by_state::by_state (state_type s) YY_NOEXCEPT
+  parser::by_state::by_state (state_type s) YY_NOEXCEPT
     : state (s)
   {}
 
-   Parser ::symbol_kind_type
-   Parser ::by_state::kind () const YY_NOEXCEPT
+  parser::symbol_kind_type
+  parser::by_state::kind () const YY_NOEXCEPT
   {
     if (state == empty_state)
       return symbol_kind::S_YYEMPTY;
@@ -173,17 +199,21 @@ namespace  CINT { namespace PreProcess  {
       return YY_CAST (symbol_kind_type, yystos_[+state]);
   }
 
-   Parser ::stack_symbol_type::stack_symbol_type ()
+  parser::stack_symbol_type::stack_symbol_type ()
   {}
 
-   Parser ::stack_symbol_type::stack_symbol_type (YY_RVREF (stack_symbol_type) that)
-    : super_type (YY_MOVE (that.state))
+  parser::stack_symbol_type::stack_symbol_type (YY_RVREF (stack_symbol_type) that)
+    : super_type (YY_MOVE (that.state), YY_MOVE (that.location))
   {
     switch (that.kind ())
     {
-      case symbol_kind::S_INTEGER: // INTEGER
-      case symbol_kind::S_term: // term
+      case symbol_kind::S_NUMBER: // "number"
+      case symbol_kind::S_exp: // exp
         value.YY_MOVE_OR_COPY< int > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_IDENTIFIER: // "identifier"
+        value.YY_MOVE_OR_COPY< std::string > (YY_MOVE (that.value));
         break;
 
       default:
@@ -196,14 +226,18 @@ namespace  CINT { namespace PreProcess  {
 #endif
   }
 
-   Parser ::stack_symbol_type::stack_symbol_type (state_type s, YY_MOVE_REF (symbol_type) that)
-    : super_type (s)
+  parser::stack_symbol_type::stack_symbol_type (state_type s, YY_MOVE_REF (symbol_type) that)
+    : super_type (s, YY_MOVE (that.location))
   {
     switch (that.kind ())
     {
-      case symbol_kind::S_INTEGER: // INTEGER
-      case symbol_kind::S_term: // term
+      case symbol_kind::S_NUMBER: // "number"
+      case symbol_kind::S_exp: // exp
         value.move< int > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_IDENTIFIER: // "identifier"
+        value.move< std::string > (YY_MOVE (that.value));
         break;
 
       default:
@@ -215,39 +249,49 @@ namespace  CINT { namespace PreProcess  {
   }
 
 #if YY_CPLUSPLUS < 201103L
-   Parser ::stack_symbol_type&
-   Parser ::stack_symbol_type::operator= (const stack_symbol_type& that)
+  parser::stack_symbol_type&
+  parser::stack_symbol_type::operator= (const stack_symbol_type& that)
   {
     state = that.state;
     switch (that.kind ())
     {
-      case symbol_kind::S_INTEGER: // INTEGER
-      case symbol_kind::S_term: // term
+      case symbol_kind::S_NUMBER: // "number"
+      case symbol_kind::S_exp: // exp
         value.copy< int > (that.value);
         break;
 
+      case symbol_kind::S_IDENTIFIER: // "identifier"
+        value.copy< std::string > (that.value);
+        break;
+
       default:
         break;
     }
 
+    location = that.location;
     return *this;
   }
 
-   Parser ::stack_symbol_type&
-   Parser ::stack_symbol_type::operator= (stack_symbol_type& that)
+  parser::stack_symbol_type&
+  parser::stack_symbol_type::operator= (stack_symbol_type& that)
   {
     state = that.state;
     switch (that.kind ())
     {
-      case symbol_kind::S_INTEGER: // INTEGER
-      case symbol_kind::S_term: // term
+      case symbol_kind::S_NUMBER: // "number"
+      case symbol_kind::S_exp: // exp
         value.move< int > (that.value);
+        break;
+
+      case symbol_kind::S_IDENTIFIER: // "identifier"
+        value.move< std::string > (that.value);
         break;
 
       default:
         break;
     }
 
+    location = that.location;
     // that is emptied.
     that.state = empty_state;
     return *this;
@@ -256,7 +300,7 @@ namespace  CINT { namespace PreProcess  {
 
   template <typename Base>
   void
-   Parser ::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
+  parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
   {
     if (yymsg)
       YY_SYMBOL_PRINT (yymsg, yysym);
@@ -265,7 +309,7 @@ namespace  CINT { namespace PreProcess  {
 #if YYDEBUG
   template <typename Base>
   void
-   Parser ::yy_print_ (std::ostream& yyo, const basic_symbol<Base>& yysym) const
+  parser::yy_print_ (std::ostream& yyo, const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
     YY_USE (yyoutput);
@@ -275,15 +319,38 @@ namespace  CINT { namespace PreProcess  {
       {
         symbol_kind_type yykind = yysym.kind ();
         yyo << (yykind < YYNTOKENS ? "token" : "nterm")
-            << ' ' << yysym.name () << " (";
-        YY_USE (yykind);
+            << ' ' << yysym.name () << " ("
+            << yysym.location << ": ";
+        switch (yykind)
+    {
+      case symbol_kind::S_IDENTIFIER: // "identifier"
+#line 34 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                 { yyo << yysym.value.template as < std::string > (); }
+#line 330 "parser.cpp"
+        break;
+
+      case symbol_kind::S_NUMBER: // "number"
+#line 34 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                 { yyo << yysym.value.template as < int > (); }
+#line 336 "parser.cpp"
+        break;
+
+      case symbol_kind::S_exp: // exp
+#line 34 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                 { yyo << yysym.value.template as < int > (); }
+#line 342 "parser.cpp"
+        break;
+
+      default:
+        break;
+    }
         yyo << ')';
       }
   }
 #endif
 
   void
-   Parser ::yypush_ (const char* m, YY_MOVE_REF (stack_symbol_type) sym)
+  parser::yypush_ (const char* m, YY_MOVE_REF (stack_symbol_type) sym)
   {
     if (m)
       YY_SYMBOL_PRINT (m, sym);
@@ -291,7 +358,7 @@ namespace  CINT { namespace PreProcess  {
   }
 
   void
-   Parser ::yypush_ (const char* m, state_type s, YY_MOVE_REF (symbol_type) sym)
+  parser::yypush_ (const char* m, state_type s, YY_MOVE_REF (symbol_type) sym)
   {
 #if 201103L <= YY_CPLUSPLUS
     yypush_ (m, stack_symbol_type (s, std::move (sym)));
@@ -302,40 +369,40 @@ namespace  CINT { namespace PreProcess  {
   }
 
   void
-   Parser ::yypop_ (int n) YY_NOEXCEPT
+  parser::yypop_ (int n) YY_NOEXCEPT
   {
     yystack_.pop (n);
   }
 
 #if YYDEBUG
   std::ostream&
-   Parser ::debug_stream () const
+  parser::debug_stream () const
   {
     return *yycdebug_;
   }
 
   void
-   Parser ::set_debug_stream (std::ostream& o)
+  parser::set_debug_stream (std::ostream& o)
   {
     yycdebug_ = &o;
   }
 
 
-   Parser ::debug_level_type
-   Parser ::debug_level () const
+  parser::debug_level_type
+  parser::debug_level () const
   {
     return yydebug_;
   }
 
   void
-   Parser ::set_debug_level (debug_level_type l)
+  parser::set_debug_level (debug_level_type l)
   {
     yydebug_ = l;
   }
 #endif // YYDEBUG
 
-   Parser ::state_type
-   Parser ::yy_lr_goto_state_ (state_type yystate, int yysym)
+  parser::state_type
+  parser::yy_lr_goto_state_ (state_type yystate, int yysym)
   {
     int yyr = yypgoto_[yysym - YYNTOKENS] + yystate;
     if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
@@ -345,25 +412,25 @@ namespace  CINT { namespace PreProcess  {
   }
 
   bool
-   Parser ::yy_pact_value_is_default_ (int yyvalue) YY_NOEXCEPT
+  parser::yy_pact_value_is_default_ (int yyvalue) YY_NOEXCEPT
   {
     return yyvalue == yypact_ninf_;
   }
 
   bool
-   Parser ::yy_table_value_is_error_ (int yyvalue) YY_NOEXCEPT
+  parser::yy_table_value_is_error_ (int yyvalue) YY_NOEXCEPT
   {
     return yyvalue == yytable_ninf_;
   }
 
   int
-   Parser ::operator() ()
+  parser::operator() ()
   {
     return parse ();
   }
 
   int
-   Parser ::parse ()
+  parser::parse ()
   {
     int yyn;
     /// Length of the RHS of the rule being reduced.
@@ -376,8 +443,15 @@ namespace  CINT { namespace PreProcess  {
     /// The lookahead symbol.
     symbol_type yyla;
 
+    /// The locations where the error started and ended.
+    stack_symbol_type yyerror_range[3];
+
     /// The return value of parse ().
     int yyresult;
+
+    // Discard the LAC context in case there still is one left from a
+    // previous invocation.
+    yy_lac_discard_ ("init");
 
 #if YY_EXCEPTIONS
     try
@@ -424,7 +498,7 @@ namespace  CINT { namespace PreProcess  {
         try
 #endif // YY_EXCEPTIONS
           {
-            symbol_type yylookahead (yylex ());
+            symbol_type yylookahead (yylex (drv));
             yyla.move (yylookahead);
           }
 #if YY_EXCEPTIONS
@@ -453,6 +527,8 @@ namespace  CINT { namespace PreProcess  {
     yyn += yyla.kind ();
     if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yyla.kind ())
       {
+        if (!yy_lac_establish_ (yyla.kind ()))
+          goto yyerrlab;
         goto yydefault;
       }
 
@@ -462,6 +538,9 @@ namespace  CINT { namespace PreProcess  {
       {
         if (yy_table_value_is_error_ (yyn))
           goto yyerrlab;
+        if (!yy_lac_establish_ (yyla.kind ()))
+          goto yyerrlab;
+
         yyn = -yyn;
         goto yyreduce;
       }
@@ -472,6 +551,7 @@ namespace  CINT { namespace PreProcess  {
 
     // Shift the lookahead token.
     yypush_ ("Shifting", state_type (yyn), YY_MOVE (yyla));
+    yy_lac_discard_ ("shift");
     goto yynewstate;
 
 
@@ -498,9 +578,13 @@ namespace  CINT { namespace PreProcess  {
          when using variants.  */
       switch (yyr1_[yyn])
     {
-      case symbol_kind::S_INTEGER: // INTEGER
-      case symbol_kind::S_term: // term
+      case symbol_kind::S_NUMBER: // "number"
+      case symbol_kind::S_exp: // exp
         yylhs.value.emplace< int > ();
+        break;
+
+      case symbol_kind::S_IDENTIFIER: // "identifier"
+        yylhs.value.emplace< std::string > ();
         break;
 
       default:
@@ -508,6 +592,12 @@ namespace  CINT { namespace PreProcess  {
     }
 
 
+      // Default location.
+      {
+        stack_type::slice range (yystack_, yylen);
+        YYLLOC_DEFAULT (yylhs.location, range, yylen);
+        yyerror_range[1].location = yylhs.location;
+      }
 
       // Perform the reduction.
       YY_REDUCE_PRINT (yyn);
@@ -517,20 +607,74 @@ namespace  CINT { namespace PreProcess  {
         {
           switch (yyn)
             {
-  case 2: // term: %empty
-#line 18 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
-           {}
-#line 524 "/Users/__nya__/Desktop/C-interpreter/parser_cpp/parser.cpp"
+  case 2: // unit: assignments exp
+#line 37 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                       { drv.result = yystack_[0].value.as < int > (); }
+#line 614 "parser.cpp"
     break;
 
-  case 3: // term: INTEGER
-#line 19 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
-              { yylhs.value.as < int > () = yystack_[0].value.as < int > (); }
-#line 530 "/Users/__nya__/Desktop/C-interpreter/parser_cpp/parser.cpp"
+  case 3: // assignments: %empty
+#line 40 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                         {}
+#line 620 "parser.cpp"
+    break;
+
+  case 4: // assignments: assignments assignment
+#line 41 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                         {}
+#line 626 "parser.cpp"
+    break;
+
+  case 5: // assignment: "identifier" ":=" exp
+#line 44 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                        { drv.variables[yystack_[2].value.as < std::string > ()] = yystack_[0].value.as < int > (); }
+#line 632 "parser.cpp"
+    break;
+
+  case 6: // exp: "number"
+#line 49 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+  { yylhs.value.as < int > () = yystack_[0].value.as < int > (); }
+#line 638 "parser.cpp"
+    break;
+
+  case 7: // exp: "identifier"
+#line 50 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                { yylhs.value.as < int > () = drv.variables[yystack_[0].value.as < std::string > ()]; }
+#line 644 "parser.cpp"
+    break;
+
+  case 8: // exp: exp "+" exp
+#line 51 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                { yylhs.value.as < int > () = yystack_[2].value.as < int > () + yystack_[0].value.as < int > (); }
+#line 650 "parser.cpp"
+    break;
+
+  case 9: // exp: exp "-" exp
+#line 52 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                { yylhs.value.as < int > () = yystack_[2].value.as < int > () - yystack_[0].value.as < int > (); }
+#line 656 "parser.cpp"
+    break;
+
+  case 10: // exp: exp "*" exp
+#line 53 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                { yylhs.value.as < int > () = yystack_[2].value.as < int > () * yystack_[0].value.as < int > (); }
+#line 662 "parser.cpp"
+    break;
+
+  case 11: // exp: exp "/" exp
+#line 54 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                { yylhs.value.as < int > () = yystack_[2].value.as < int > () / yystack_[0].value.as < int > (); }
+#line 668 "parser.cpp"
+    break;
+
+  case 12: // exp: "(" exp ")"
+#line 55 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+                { yylhs.value.as < int > () = yystack_[1].value.as < int > (); }
+#line 674 "parser.cpp"
     break;
 
 
-#line 534 "/Users/__nya__/Desktop/C-interpreter/parser_cpp/parser.cpp"
+#line 678 "parser.cpp"
 
             default:
               break;
@@ -562,11 +706,13 @@ namespace  CINT { namespace PreProcess  {
     if (!yyerrstatus_)
       {
         ++yynerrs_;
-        std::string msg = YY_("syntax error");
-        error (YY_MOVE (msg));
+        context yyctx (*this, yyla);
+        std::string msg = yysyntax_error_ (yyctx);
+        error (yyla.location, YY_MOVE (msg));
       }
 
 
+    yyerror_range[1].location = yyla.location;
     if (yyerrstatus_ == 3)
       {
         /* If just tried and failed to reuse lookahead token after an
@@ -628,6 +774,7 @@ namespace  CINT { namespace PreProcess  {
         if (yystack_.size () == 1)
           YYABORT;
 
+        yyerror_range[1].location = yystack_[0].location;
         yy_destroy_ ("Error: popping", yystack_[0]);
         yypop_ ();
         YY_STACK_PRINT ();
@@ -635,8 +782,11 @@ namespace  CINT { namespace PreProcess  {
     {
       stack_symbol_type error_token;
 
+      yyerror_range[2].location = yyla.location;
+      YYLLOC_DEFAULT (error_token.location, yyerror_range, 2);
 
       // Shift the error token.
+      yy_lac_discard_ ("error recovery");
       error_token.state = state_type (yyn);
       yypush_ ("Shifting", YY_MOVE (error_token));
     }
@@ -698,106 +848,370 @@ namespace  CINT { namespace PreProcess  {
   }
 
   void
-   Parser ::error (const syntax_error& yyexc)
+  parser::error (const syntax_error& yyexc)
   {
-    error (yyexc.what ());
+    error (yyexc.location, yyexc.what ());
   }
 
-#if YYDEBUG || 0
   const char *
-   Parser ::symbol_name (symbol_kind_type yysymbol)
+  parser::symbol_name (symbol_kind_type yysymbol)
   {
-    return yytname_[yysymbol];
+    static const char *const yy_sname[] =
+    {
+    "end of file", "error", "invalid token", ":=", "-", "+", "*", "/", "(",
+  ")", "identifier", "number", "$accept", "unit", "assignments",
+  "assignment", "exp", YY_NULLPTR
+    };
+    return yy_sname[yysymbol];
   }
-#endif // #if YYDEBUG || 0
 
 
 
+  // parser::context.
+  parser::context::context (const parser& yyparser, const symbol_type& yyla)
+    : yyparser_ (yyparser)
+    , yyla_ (yyla)
+  {}
 
-
-
-
-
-
-  const signed char  Parser ::yypact_ninf_ = -4;
-
-  const signed char  Parser ::yytable_ninf_ = -1;
-
-  const signed char
-   Parser ::yypact_[] =
+  int
+  parser::context::expected_tokens (symbol_kind_type yyarg[], int yyargn) const
   {
-      -3,    -4,     1,    -4
-  };
-
-  const signed char
-   Parser ::yydefact_[] =
-  {
-       2,     3,     0,     1
-  };
-
-  const signed char
-   Parser ::yypgoto_[] =
-  {
-      -4,    -4
-  };
-
-  const signed char
-   Parser ::yydefgoto_[] =
-  {
-       0,     2
-  };
-
-  const signed char
-   Parser ::yytable_[] =
-  {
-       1,     3
-  };
-
-  const signed char
-   Parser ::yycheck_[] =
-  {
-       3,     0
-  };
-
-  const signed char
-   Parser ::yystos_[] =
-  {
-       0,     3,     5,     0
-  };
-
-  const signed char
-   Parser ::yyr1_[] =
-  {
-       0,     4,     5,     5
-  };
-
-  const signed char
-   Parser ::yyr2_[] =
-  {
-       0,     2,     0,     1
-  };
-
+    // Actual number of expected tokens
+    int yycount = 0;
 
 #if YYDEBUG
-  // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-  // First, the terminals, then, starting at \a YYNTOKENS, nonterminals.
-  const char*
-  const  Parser ::yytname_[] =
-  {
-  "YYEOF", "error", "\"invalid token\"", "INTEGER", "$accept", "term", YY_NULLPTR
-  };
+    // Execute LAC once. We don't care if it is successful, we
+    // only do it for the sake of debugging output.
+    if (!yyparser_.yy_lac_established_)
+      yyparser_.yy_lac_check_ (yyla_.kind ());
 #endif
 
+    for (int yyx = 0; yyx < YYNTOKENS; ++yyx)
+      {
+        symbol_kind_type yysym = YY_CAST (symbol_kind_type, yyx);
+        if (yysym != symbol_kind::S_YYerror
+            && yysym != symbol_kind::S_YYUNDEF
+            && yyparser_.yy_lac_check_ (yysym))
+          {
+            if (!yyarg)
+              ++yycount;
+            else if (yycount == yyargn)
+              return 0;
+            else
+              yyarg[yycount++] = yysym;
+          }
+      }
+    if (yyarg && yycount == 0 && 0 < yyargn)
+      yyarg[0] = symbol_kind::S_YYEMPTY;
+    return yycount;
+  }
+
+
+
+
+  bool
+  parser::yy_lac_check_ (symbol_kind_type yytoken) const
+  {
+    // Logically, the yylac_stack's lifetime is confined to this function.
+    // Clear it, to get rid of potential left-overs from previous call.
+    yylac_stack_.clear ();
+    // Reduce until we encounter a shift and thereby accept the token.
+#if YYDEBUG
+    YYCDEBUG << "LAC: checking lookahead " << symbol_name (yytoken) << ':';
+#endif
+    std::ptrdiff_t lac_top = 0;
+    while (true)
+      {
+        state_type top_state = (yylac_stack_.empty ()
+                                ? yystack_[lac_top].state
+                                : yylac_stack_.back ());
+        int yyrule = yypact_[+top_state];
+        if (yy_pact_value_is_default_ (yyrule)
+            || (yyrule += yytoken) < 0 || yylast_ < yyrule
+            || yycheck_[yyrule] != yytoken)
+          {
+            // Use the default action.
+            yyrule = yydefact_[+top_state];
+            if (yyrule == 0)
+              {
+                YYCDEBUG << " Err\n";
+                return false;
+              }
+          }
+        else
+          {
+            // Use the action from yytable.
+            yyrule = yytable_[yyrule];
+            if (yy_table_value_is_error_ (yyrule))
+              {
+                YYCDEBUG << " Err\n";
+                return false;
+              }
+            if (0 < yyrule)
+              {
+                YYCDEBUG << " S" << yyrule << '\n';
+                return true;
+              }
+            yyrule = -yyrule;
+          }
+        // By now we know we have to simulate a reduce.
+        YYCDEBUG << " R" << yyrule - 1;
+        // Pop the corresponding number of values from the stack.
+        {
+          std::ptrdiff_t yylen = yyr2_[yyrule];
+          // First pop from the LAC stack as many tokens as possible.
+          std::ptrdiff_t lac_size = std::ptrdiff_t (yylac_stack_.size ());
+          if (yylen < lac_size)
+            {
+              yylac_stack_.resize (std::size_t (lac_size - yylen));
+              yylen = 0;
+            }
+          else if (lac_size)
+            {
+              yylac_stack_.clear ();
+              yylen -= lac_size;
+            }
+          // Only afterwards look at the main stack.
+          // We simulate popping elements by incrementing lac_top.
+          lac_top += yylen;
+        }
+        // Keep top_state in sync with the updated stack.
+        top_state = (yylac_stack_.empty ()
+                     ? yystack_[lac_top].state
+                     : yylac_stack_.back ());
+        // Push the resulting state of the reduction.
+        state_type state = yy_lr_goto_state_ (top_state, yyr1_[yyrule]);
+        YYCDEBUG << " G" << int (state);
+        yylac_stack_.push_back (state);
+      }
+  }
+
+  // Establish the initial context if no initial context currently exists.
+  bool
+  parser::yy_lac_establish_ (symbol_kind_type yytoken)
+  {
+    /* Establish the initial context for the current lookahead if no initial
+       context is currently established.
+
+       We define a context as a snapshot of the parser stacks.  We define
+       the initial context for a lookahead as the context in which the
+       parser initially examines that lookahead in order to select a
+       syntactic action.  Thus, if the lookahead eventually proves
+       syntactically unacceptable (possibly in a later context reached via a
+       series of reductions), the initial context can be used to determine
+       the exact set of tokens that would be syntactically acceptable in the
+       lookahead's place.  Moreover, it is the context after which any
+       further semantic actions would be erroneous because they would be
+       determined by a syntactically unacceptable token.
+
+       yy_lac_establish_ should be invoked when a reduction is about to be
+       performed in an inconsistent state (which, for the purposes of LAC,
+       includes consistent states that don't know they're consistent because
+       their default reductions have been disabled).
+
+       For parse.lac=full, the implementation of yy_lac_establish_ is as
+       follows.  If no initial context is currently established for the
+       current lookahead, then check if that lookahead can eventually be
+       shifted if syntactic actions continue from the current context.  */
+    if (yy_lac_established_)
+      return true;
+    else
+      {
+#if YYDEBUG
+        YYCDEBUG << "LAC: initial context established for "
+                 << symbol_name (yytoken) << '\n';
+#endif
+        yy_lac_established_ = true;
+        return yy_lac_check_ (yytoken);
+      }
+  }
+
+  // Discard any previous initial lookahead context.
+  void
+  parser::yy_lac_discard_ (const char* event)
+  {
+   /* Discard any previous initial lookahead context because of Event,
+      which may be a lookahead change or an invalidation of the currently
+      established initial context for the current lookahead.
+
+      The most common example of a lookahead change is a shift.  An example
+      of both cases is syntax error recovery.  That is, a syntax error
+      occurs when the lookahead is syntactically erroneous for the
+      currently established initial context, so error recovery manipulates
+      the parser stacks to try to find a new initial context in which the
+      current lookahead is syntactically acceptable.  If it fails to find
+      such a context, it discards the lookahead.  */
+    if (yy_lac_established_)
+      {
+        YYCDEBUG << "LAC: initial context discarded due to "
+                 << event << '\n';
+        yy_lac_established_ = false;
+      }
+  }
+
+
+  int
+  parser::yy_syntax_error_arguments_ (const context& yyctx,
+                                                 symbol_kind_type yyarg[], int yyargn) const
+  {
+    /* There are many possibilities here to consider:
+       - If this state is a consistent state with a default action, then
+         the only way this function was invoked is if the default action
+         is an error action.  In that case, don't check for expected
+         tokens because there are none.
+       - The only way there can be no lookahead present (in yyla) is
+         if this state is a consistent state with a default action.
+         Thus, detecting the absence of a lookahead is sufficient to
+         determine that there is no unexpected or expected token to
+         report.  In that case, just report a simple "syntax error".
+       - Don't assume there isn't a lookahead just because this state is
+         a consistent state with a default action.  There might have
+         been a previous inconsistent state, consistent state with a
+         non-default action, or user semantic action that manipulated
+         yyla.  (However, yyla is currently not documented for users.)
+         In the first two cases, it might appear that the current syntax
+         error should have been detected in the previous state when
+         yy_lac_check was invoked.  However, at that time, there might
+         have been a different syntax error that discarded a different
+         initial context during error recovery, leaving behind the
+         current lookahead.
+    */
+
+    if (!yyctx.lookahead ().empty ())
+      {
+        if (yyarg)
+          yyarg[0] = yyctx.token ();
+        int yyn = yyctx.expected_tokens (yyarg ? yyarg + 1 : yyarg, yyargn - 1);
+        return yyn + 1;
+      }
+    return 0;
+  }
+
+  // Generate an error message.
+  std::string
+  parser::yysyntax_error_ (const context& yyctx) const
+  {
+    // Its maximum.
+    enum { YYARGS_MAX = 5 };
+    // Arguments of yyformat.
+    symbol_kind_type yyarg[YYARGS_MAX];
+    int yycount = yy_syntax_error_arguments_ (yyctx, yyarg, YYARGS_MAX);
+
+    char const* yyformat = YY_NULLPTR;
+    switch (yycount)
+      {
+#define YYCASE_(N, S)                         \
+        case N:                               \
+          yyformat = S;                       \
+        break
+      default: // Avoid compiler warnings.
+        YYCASE_ (0, YY_("syntax error"));
+        YYCASE_ (1, YY_("syntax error, unexpected %s"));
+        YYCASE_ (2, YY_("syntax error, unexpected %s, expecting %s"));
+        YYCASE_ (3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+        YYCASE_ (4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+        YYCASE_ (5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+#undef YYCASE_
+      }
+
+    std::string yyres;
+    // Argument number.
+    std::ptrdiff_t yyi = 0;
+    for (char const* yyp = yyformat; *yyp; ++yyp)
+      if (yyp[0] == '%' && yyp[1] == 's' && yyi < yycount)
+        {
+          yyres += symbol_name (yyarg[yyi++]);
+          ++yyp;
+        }
+      else
+        yyres += *yyp;
+    return yyres;
+  }
+
+
+  const signed char parser::yypact_ninf_ = -5;
+
+  const signed char parser::yytable_ninf_ = -1;
+
+  const signed char
+  parser::yypact_[] =
+  {
+      -5,     5,     9,    -5,    13,    15,    -5,    -5,     8,    -5,
+      -3,    13,    13,    13,    13,    13,    -5,     8,    19,    19,
+      -5,    -5
+  };
+
+  const signed char
+  parser::yydefact_[] =
+  {
+       3,     0,     0,     1,     0,     7,     6,     4,     2,     7,
+       0,     0,     0,     0,     0,     0,    12,     5,     9,     8,
+      10,    11
+  };
+
+  const signed char
+  parser::yypgoto_[] =
+  {
+      -5,    -5,    -5,    -5,    -4
+  };
+
+  const signed char
+  parser::yydefgoto_[] =
+  {
+       0,     1,     2,     7,     8
+  };
+
+  const signed char
+  parser::yytable_[] =
+  {
+      10,    12,    13,    14,    15,     3,    16,    17,    18,    19,
+      20,    21,    12,    13,    14,    15,     0,     4,    11,     5,
+       6,     4,     0,     9,     6,    14,    15
+  };
+
+  const signed char
+  parser::yycheck_[] =
+  {
+       4,     4,     5,     6,     7,     0,     9,    11,    12,    13,
+      14,    15,     4,     5,     6,     7,    -1,     8,     3,    10,
+      11,     8,    -1,    10,    11,     6,     7
+  };
+
+  const signed char
+  parser::yystos_[] =
+  {
+       0,    13,    14,     0,     8,    10,    11,    15,    16,    10,
+      16,     3,     4,     5,     6,     7,     9,    16,    16,    16,
+      16,    16
+  };
+
+  const signed char
+  parser::yyr1_[] =
+  {
+       0,    12,    13,    14,    14,    15,    16,    16,    16,    16,
+      16,    16,    16
+  };
+
+  const signed char
+  parser::yyr2_[] =
+  {
+       0,     2,     2,     0,     2,     3,     1,     1,     3,     3,
+       3,     3,     3
+  };
+
+
+
 
 #if YYDEBUG
   const signed char
-   Parser ::yyrline_[] =
+  parser::yyrline_[] =
   {
-       0,    18,    18,    19
+       0,    37,    37,    40,    41,    44,    49,    50,    51,    52,
+      53,    54,    55
   };
 
   void
-   Parser ::yy_stack_print_ () const
+  parser::yy_stack_print_ () const
   {
     *yycdebug_ << "Stack now";
     for (stack_type::const_iterator
@@ -809,7 +1223,7 @@ namespace  CINT { namespace PreProcess  {
   }
 
   void
-   Parser ::yy_reduce_print_ (int yyrule) const
+  parser::yy_reduce_print_ (int yyrule) const
   {
     int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
@@ -824,8 +1238,13 @@ namespace  CINT { namespace PreProcess  {
 #endif // YYDEBUG
 
 
-#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
-} } //  CINT::PreProcess 
-#line 830 "/Users/__nya__/Desktop/C-interpreter/parser_cpp/parser.cpp"
+} // yy
+#line 1243 "parser.cpp"
 
-#line 22 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 56 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+
+void
+yy::parser::error (const location_type& l, const std::string& m)
+{
+  std::cerr << l << ": " << m << '\n';
+}
