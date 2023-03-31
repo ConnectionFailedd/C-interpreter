@@ -535,8 +535,8 @@ char * yytext;
 #define YY_NO_INPUT 1
 #line 12 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
 // A number symbol corresponding to the value in S.
-yy::parser::symbol_type
-make_NUMBER(const std::string & s, const yy::parser::location_type & loc);
+CINT::PreProcess::Parser::symbol_type
+make_NUMBER(const std::string & s, const CINT::PreProcess::Parser::location_type & loc);
 #line 556 "lexer.cpp"
 #line 20 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
 // Code run each time a pattern is matched.
@@ -820,7 +820,7 @@ YY_DECL {
 
 #line 26 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
         // A handy shortcut to the location held by the driver.
-        yy::location & loc = drv.location;
+        CINT::PreProcess::location & loc = _driver.location;
         // Code run each time yylex is called.
         loc.step();
 
@@ -909,37 +909,37 @@ YY_DECL {
             case 3:
                 YY_RULE_SETUP
 #line 33 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-                return yy::parser::make_MINUS(loc);
+                return CINT::PreProcess::Parser::make_MINUS(loc);
                 YY_BREAK
             case 4:
                 YY_RULE_SETUP
 #line 34 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-                return yy::parser::make_PLUS(loc);
+                return CINT::PreProcess::Parser::make_PLUS(loc);
                 YY_BREAK
             case 5:
                 YY_RULE_SETUP
 #line 35 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-                return yy::parser::make_STAR(loc);
+                return CINT::PreProcess::Parser::make_STAR(loc);
                 YY_BREAK
             case 6:
                 YY_RULE_SETUP
 #line 36 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-                return yy::parser::make_SLASH(loc);
+                return CINT::PreProcess::Parser::make_SLASH(loc);
                 YY_BREAK
             case 7:
                 YY_RULE_SETUP
 #line 37 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-                return yy::parser::make_LPAREN(loc);
+                return CINT::PreProcess::Parser::make_LPAREN(loc);
                 YY_BREAK
             case 8:
                 YY_RULE_SETUP
 #line 38 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-                return yy::parser::make_RPAREN(loc);
+                return CINT::PreProcess::Parser::make_RPAREN(loc);
                 YY_BREAK
             case 9:
                 YY_RULE_SETUP
 #line 39 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-                return yy::parser::make_ASSIGN(loc);
+                return CINT::PreProcess::Parser::make_ASSIGN(loc);
                 YY_BREAK
             case 10:
                 YY_RULE_SETUP
@@ -949,18 +949,18 @@ YY_DECL {
             case 11:
                 YY_RULE_SETUP
 #line 42 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-                return yy::parser::make_IDENTIFIER(yytext, loc);
+                return CINT::PreProcess::Parser::make_IDENTIFIER(yytext, loc);
                 YY_BREAK
             case 12:
                 YY_RULE_SETUP
 #line 43 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 {
-                    throw yy::parser::syntax_error(loc, "invalid character: " + std::string(yytext));
+                    throw CINT::PreProcess::Parser::syntax_error(loc, "invalid character: " + std::string(yytext));
                 }
                 YY_BREAK
             case YY_STATE_EOF(INITIAL):
 #line 47 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-                return yy::parser::make_YYEOF(loc);
+                return CINT::PreProcess::Parser::make_YYEOF(loc);
                 YY_BREAK
             case 13:
                 YY_RULE_SETUP
@@ -2004,15 +2004,18 @@ void yyfree(void * ptr) {
 
 #line 48 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
 
-yy::parser::symbol_type
-make_NUMBER(const std::string & s, const yy::parser::location_type & loc) {
+namespace CINT {
+namespace PreProcess {
+
+CINT::PreProcess::Parser::symbol_type
+make_NUMBER(const std::string & s, const CINT::PreProcess::Parser::location_type & loc) {
     errno = 0;
     long n = strtol(s.c_str(), NULL, 10);
     if(!(INT_MIN <= n && n <= INT_MAX && errno != ERANGE))
-        throw yy::parser::syntax_error(loc, "integer is out of range: " + s);
-    return yy::parser::make_NUMBER((int)n, loc);
+        throw CINT::PreProcess::Parser::syntax_error(loc, "integer is out of range: " + s);
+    return CINT::PreProcess::Parser::make_NUMBER((int)n, loc);
 }
-void driver::scan_begin() {
+void Driver::scan_begin() {
     yy_flex_debug = trace_scanning;
     if(file.empty() || file == "-")
         yyin = stdin;
@@ -2022,6 +2025,9 @@ void driver::scan_begin() {
     }
 }
 
-void driver::scan_end() {
+void Driver::scan_end() {
     fclose(yyin);
 }
+
+}
+} // namespace CINT::PreProcess

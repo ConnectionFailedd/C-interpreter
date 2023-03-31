@@ -32,7 +32,7 @@
 
 /**
  ** \file parser.hpp
- ** Define the yy::parser class.
+ ** Define the  CINT::PreProcess ::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
@@ -44,12 +44,18 @@
 #ifndef YY_YY_PARSER_HPP_INCLUDED
 #define YY_YY_PARSER_HPP_INCLUDED
 // "%code requires" blocks.
-#line 8 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 11 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 
 #include <string>
-class driver;
+namespace CINT {
+namespace PreProcess {
 
-#line 54 "parser.hpp"
+class Driver;
+
+}
+} // namespace CINT::PreProcess
+
+#line 60 "parser.hpp"
 
 #include <cassert>
 #include <cstdlib> // std::abort
@@ -187,11 +193,12 @@ class driver;
 #define YYDEBUG 1
 #endif
 
-namespace yy {
-#line 194 "parser.hpp"
+#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+namespace CINT { namespace PreProcess {
+#line 201 "parser.hpp"
 
 /// A Bison parser.
-class parser {
+class Parser {
 public:
 #ifdef YYSTYPE
 #ifdef __GNUC__
@@ -585,7 +592,7 @@ public:
 
         /// The user-facing name of this symbol.
         const char * name() const YY_NOEXCEPT {
-            return parser::symbol_name(this->kind());
+            return Parser::symbol_name(this->kind());
         }
 
         /// Backward compatibility (Bison 3.6).
@@ -699,14 +706,14 @@ public:
     };
 
     /// Build a parser object.
-    parser(driver & drv_yyarg);
-    virtual ~parser();
+    Parser(CINT::PreProcess::Driver & _driver_yyarg);
+    virtual ~Parser();
 
 #if 201103L <= YY_CPLUSPLUS
     /// Non copyable.
-    parser(const parser &) = delete;
+    Parser(const Parser &) = delete;
     /// Non copyable.
-    parser & operator=(const parser &) = delete;
+    Parser & operator=(const Parser &) = delete;
 #endif
 
     /// Parse.  An alias for parse ().
@@ -879,7 +886,7 @@ public:
 
     class context {
     public:
-        context(const parser & yyparser, const symbol_type & yyla);
+        context(const Parser & yyparser, const symbol_type & yyla);
         const symbol_type & lookahead() const YY_NOEXCEPT { return yyla_; }
         symbol_kind_type token() const YY_NOEXCEPT { return yyla_.kind(); }
         const location_type & location() const YY_NOEXCEPT { return yyla_.location; }
@@ -890,16 +897,16 @@ public:
         int expected_tokens(symbol_kind_type yyarg[], int yyargn) const;
 
     private:
-        const parser & yyparser_;
+        const Parser & yyparser_;
         const symbol_type & yyla_;
     };
 
 private:
 #if YY_CPLUSPLUS < 201103L
     /// Non copyable.
-    parser(const parser &);
+    Parser(const Parser &);
     /// Non copyable.
-    parser & operator=(const parser &);
+    Parser & operator=(const Parser &);
 #endif
 
     /// Check the lookahead yytoken.
@@ -1203,17 +1210,17 @@ private:
     };
 
     // User arguments.
-    driver & drv;
+    CINT::PreProcess::Driver & _driver;
 };
 
-inline parser::symbol_kind_type
-parser::yytranslate_(int t) YY_NOEXCEPT {
+inline Parser::symbol_kind_type
+Parser::yytranslate_(int t) YY_NOEXCEPT {
     return static_cast<symbol_kind_type>(t);
 }
 
 // basic_symbol.
 template <typename Base>
-parser::basic_symbol<Base>::basic_symbol(const basic_symbol & that)
+Parser::basic_symbol<Base>::basic_symbol(const basic_symbol & that)
     : Base(that), value(), location(that.location) {
     switch(this->kind()) {
     case symbol_kind::S_NUMBER: // "number"
@@ -1231,18 +1238,18 @@ parser::basic_symbol<Base>::basic_symbol(const basic_symbol & that)
 }
 
 template <typename Base>
-parser::symbol_kind_type
-parser::basic_symbol<Base>::type_get() const YY_NOEXCEPT {
+Parser::symbol_kind_type
+Parser::basic_symbol<Base>::type_get() const YY_NOEXCEPT {
     return this->kind();
 }
 
 template <typename Base>
-bool parser::basic_symbol<Base>::empty() const YY_NOEXCEPT {
+bool Parser::basic_symbol<Base>::empty() const YY_NOEXCEPT {
     return this->kind() == symbol_kind::S_YYEMPTY;
 }
 
 template <typename Base>
-void parser::basic_symbol<Base>::move(basic_symbol & s) {
+void Parser::basic_symbol<Base>::move(basic_symbol & s) {
     super_type::move(s);
     switch(this->kind()) {
     case symbol_kind::S_NUMBER: // "number"
@@ -1262,44 +1269,45 @@ void parser::basic_symbol<Base>::move(basic_symbol & s) {
 }
 
 // by_kind.
-inline parser::by_kind::by_kind() YY_NOEXCEPT
+inline Parser::by_kind::by_kind() YY_NOEXCEPT
     : kind_(symbol_kind::S_YYEMPTY) {}
 
 #if 201103L <= YY_CPLUSPLUS
-inline parser::by_kind::by_kind(by_kind && that) YY_NOEXCEPT
+inline Parser::by_kind::by_kind(by_kind && that) YY_NOEXCEPT
     : kind_(that.kind_) {
     that.clear();
 }
 #endif
 
-inline parser::by_kind::by_kind(const by_kind & that) YY_NOEXCEPT
+inline Parser::by_kind::by_kind(const by_kind & that) YY_NOEXCEPT
     : kind_(that.kind_) {}
 
-inline parser::by_kind::by_kind(token_kind_type t) YY_NOEXCEPT
+inline Parser::by_kind::by_kind(token_kind_type t) YY_NOEXCEPT
     : kind_(yytranslate_(t)) {}
 
 inline void
-parser::by_kind::clear() YY_NOEXCEPT {
+Parser::by_kind::clear() YY_NOEXCEPT {
     kind_ = symbol_kind::S_YYEMPTY;
 }
 
 inline void
-parser::by_kind::move(by_kind & that) {
+Parser::by_kind::move(by_kind & that) {
     kind_ = that.kind_;
     that.clear();
 }
 
-inline parser::symbol_kind_type
-parser::by_kind::kind() const YY_NOEXCEPT {
+inline Parser::symbol_kind_type
+Parser::by_kind::kind() const YY_NOEXCEPT {
     return kind_;
 }
 
-inline parser::symbol_kind_type
-parser::by_kind::type_get() const YY_NOEXCEPT {
+inline Parser::symbol_kind_type
+Parser::by_kind::type_get() const YY_NOEXCEPT {
     return this->kind();
 }
 
-} // namespace yy
-#line 1483 "parser.hpp"
+#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+}} // namespace CINT::PreProcess
+#line 1491 "parser.hpp"
 
 #endif // !YY_YY_PARSER_HPP_INCLUDED

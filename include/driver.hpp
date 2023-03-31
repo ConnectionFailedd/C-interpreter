@@ -6,12 +6,16 @@
 
 // Give Flex the prototype of yylex we want ...
 #define YY_DECL \
-    yy::parser::symbol_type yylex(driver & drv)
+    CINT::PreProcess::Parser::symbol_type yylex(CINT::PreProcess::Driver & _driver)
 // ... and declare it for the parser's sake.
 // Conducting the whole scanning and parsing of Calc++.
-class driver {
+
+namespace CINT {
+namespace PreProcess {
+
+class Driver {
 public:
-    driver();
+    Driver();
 
     std::map<std::string, int> variables;
 
@@ -27,7 +31,11 @@ public:
     // Whether to generate scanner debug traces.
     bool trace_scanning;
     // The token's location used by the scanner.
-    yy::location location;
+    CINT::PreProcess::location location;
 };
+
+}
+} // namespace CINT::PreProcess
+
 YY_DECL;
 #endif // ! DRIVER_HH

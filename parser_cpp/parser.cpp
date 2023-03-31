@@ -37,7 +37,7 @@
 #include "parser.hpp"
 
 // Unqualified %code blocks.
-#line 18 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 27 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 
 #include "driver.hpp"
 
@@ -128,11 +128,12 @@
 #define YYERROR goto yyerrorlab
 #define YYRECOVERING() (!!yyerrstatus_)
 
-namespace yy {
-#line 142 "parser.cpp"
+#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+namespace CINT { namespace PreProcess {
+#line 143 "parser.cpp"
 
 /// Build a parser object.
-parser::parser(driver & drv_yyarg)
+Parser::Parser(CINT::PreProcess::Driver & _driver_yyarg)
 #if YYDEBUG
     : yydebug_(false),
       yycdebug_(&std::cerr),
@@ -140,47 +141,47 @@ parser::parser(driver & drv_yyarg)
     :
 #endif
       yy_lac_established_(false),
-      drv(drv_yyarg) {
+      _driver(_driver_yyarg) {
 }
 
-parser::~parser() {}
+Parser::~Parser() {}
 
-parser::syntax_error::~syntax_error() YY_NOEXCEPT YY_NOTHROW {}
+Parser::syntax_error::~syntax_error() YY_NOEXCEPT YY_NOTHROW {}
 
 /*---------.
 | symbol.  |
 `---------*/
 
 // by_state.
-parser::by_state::by_state() YY_NOEXCEPT
+Parser::by_state::by_state() YY_NOEXCEPT
     : state(empty_state) {}
 
-parser::by_state::by_state(const by_state & that) YY_NOEXCEPT
+Parser::by_state::by_state(const by_state & that) YY_NOEXCEPT
     : state(that.state) {}
 
-void parser::by_state::clear() YY_NOEXCEPT {
+void Parser::by_state::clear() YY_NOEXCEPT {
     state = empty_state;
 }
 
-void parser::by_state::move(by_state & that) {
+void Parser::by_state::move(by_state & that) {
     state = that.state;
     that.clear();
 }
 
-parser::by_state::by_state(state_type s) YY_NOEXCEPT
+Parser::by_state::by_state(state_type s) YY_NOEXCEPT
     : state(s) {}
 
-parser::symbol_kind_type
-parser::by_state::kind() const YY_NOEXCEPT {
+Parser::symbol_kind_type
+Parser::by_state::kind() const YY_NOEXCEPT {
     if(state == empty_state)
         return symbol_kind::S_YYEMPTY;
     else
         return YY_CAST(symbol_kind_type, yystos_[+state]);
 }
 
-parser::stack_symbol_type::stack_symbol_type() {}
+Parser::stack_symbol_type::stack_symbol_type() {}
 
-parser::stack_symbol_type::stack_symbol_type(YY_RVREF(stack_symbol_type) that)
+Parser::stack_symbol_type::stack_symbol_type(YY_RVREF(stack_symbol_type) that)
     : super_type(YY_MOVE(that.state), YY_MOVE(that.location)) {
     switch(that.kind()) {
     case symbol_kind::S_NUMBER: // "number"
@@ -202,7 +203,7 @@ parser::stack_symbol_type::stack_symbol_type(YY_RVREF(stack_symbol_type) that)
 #endif
 }
 
-parser::stack_symbol_type::stack_symbol_type(state_type s, YY_MOVE_REF(symbol_type) that)
+Parser::stack_symbol_type::stack_symbol_type(state_type s, YY_MOVE_REF(symbol_type) that)
     : super_type(s, YY_MOVE(that.location)) {
     switch(that.kind()) {
     case symbol_kind::S_NUMBER: // "number"
@@ -223,8 +224,8 @@ parser::stack_symbol_type::stack_symbol_type(state_type s, YY_MOVE_REF(symbol_ty
 }
 
 #if YY_CPLUSPLUS < 201103L
-parser::stack_symbol_type &
-parser::stack_symbol_type::operator=(const stack_symbol_type & that) {
+Parser::stack_symbol_type &
+Parser::stack_symbol_type::operator=(const stack_symbol_type & that) {
     state = that.state;
     switch(that.kind()) {
     case symbol_kind::S_NUMBER: // "number"
@@ -244,8 +245,8 @@ parser::stack_symbol_type::operator=(const stack_symbol_type & that) {
     return *this;
 }
 
-parser::stack_symbol_type &
-parser::stack_symbol_type::operator=(stack_symbol_type & that) {
+Parser::stack_symbol_type &
+Parser::stack_symbol_type::operator=(stack_symbol_type & that) {
     state = that.state;
     switch(that.kind()) {
     case symbol_kind::S_NUMBER: // "number"
@@ -269,14 +270,14 @@ parser::stack_symbol_type::operator=(stack_symbol_type & that) {
 #endif
 
 template <typename Base>
-void parser::yy_destroy_(const char * yymsg, basic_symbol<Base> & yysym) const {
+void Parser::yy_destroy_(const char * yymsg, basic_symbol<Base> & yysym) const {
     if(yymsg)
         YY_SYMBOL_PRINT(yymsg, yysym);
 }
 
 #if YYDEBUG
 template <typename Base>
-void parser::yy_print_(std::ostream & yyo, const basic_symbol<Base> & yysym) const {
+void Parser::yy_print_(std::ostream & yyo, const basic_symbol<Base> & yysym) const {
     std::ostream & yyoutput = yyo;
     YY_USE(yyoutput);
     if(yysym.empty())
@@ -288,27 +289,27 @@ void parser::yy_print_(std::ostream & yyo, const basic_symbol<Base> & yysym) con
             << yysym.location << ": ";
         switch(yykind) {
         case symbol_kind::S_IDENTIFIER: // "identifier"
-#line 34 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 43 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
         {
             yyo << yysym.value.template as<std::string>();
         }
-#line 330 "parser.cpp"
+#line 331 "parser.cpp"
         break;
 
         case symbol_kind::S_NUMBER: // "number"
-#line 34 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 43 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
         {
             yyo << yysym.value.template as<int>();
         }
-#line 336 "parser.cpp"
+#line 337 "parser.cpp"
         break;
 
         case symbol_kind::S_exp: // exp
-#line 34 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 43 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
         {
             yyo << yysym.value.template as<int>();
         }
-#line 342 "parser.cpp"
+#line 343 "parser.cpp"
         break;
 
         default:
@@ -319,13 +320,13 @@ void parser::yy_print_(std::ostream & yyo, const basic_symbol<Base> & yysym) con
 }
 #endif
 
-void parser::yypush_(const char * m, YY_MOVE_REF(stack_symbol_type) sym) {
+void Parser::yypush_(const char * m, YY_MOVE_REF(stack_symbol_type) sym) {
     if(m)
         YY_SYMBOL_PRINT(m, sym);
     yystack_.push(YY_MOVE(sym));
 }
 
-void parser::yypush_(const char * m, state_type s, YY_MOVE_REF(symbol_type) sym) {
+void Parser::yypush_(const char * m, state_type s, YY_MOVE_REF(symbol_type) sym) {
 #if 201103L <= YY_CPLUSPLUS
     yypush_(m, stack_symbol_type(s, std::move(sym)));
 #else
@@ -334,32 +335,32 @@ void parser::yypush_(const char * m, state_type s, YY_MOVE_REF(symbol_type) sym)
 #endif
 }
 
-void parser::yypop_(int n) YY_NOEXCEPT {
+void Parser::yypop_(int n) YY_NOEXCEPT {
     yystack_.pop(n);
 }
 
 #if YYDEBUG
 std::ostream &
-parser::debug_stream() const {
+Parser::debug_stream() const {
     return *yycdebug_;
 }
 
-void parser::set_debug_stream(std::ostream & o) {
+void Parser::set_debug_stream(std::ostream & o) {
     yycdebug_ = &o;
 }
 
-parser::debug_level_type
-parser::debug_level() const {
+Parser::debug_level_type
+Parser::debug_level() const {
     return yydebug_;
 }
 
-void parser::set_debug_level(debug_level_type l) {
+void Parser::set_debug_level(debug_level_type l) {
     yydebug_ = l;
 }
 #endif // YYDEBUG
 
-parser::state_type
-parser::yy_lr_goto_state_(state_type yystate, int yysym) {
+Parser::state_type
+Parser::yy_lr_goto_state_(state_type yystate, int yysym) {
     int yyr = yypgoto_[yysym - YYNTOKENS] + yystate;
     if(0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
         return yytable_[yyr];
@@ -367,19 +368,19 @@ parser::yy_lr_goto_state_(state_type yystate, int yysym) {
         return yydefgoto_[yysym - YYNTOKENS];
 }
 
-bool parser::yy_pact_value_is_default_(int yyvalue) YY_NOEXCEPT {
+bool Parser::yy_pact_value_is_default_(int yyvalue) YY_NOEXCEPT {
     return yyvalue == yypact_ninf_;
 }
 
-bool parser::yy_table_value_is_error_(int yyvalue) YY_NOEXCEPT {
+bool Parser::yy_table_value_is_error_(int yyvalue) YY_NOEXCEPT {
     return yyvalue == yytable_ninf_;
 }
 
-int parser::operator()() {
+int Parser::operator()() {
     return parse();
 }
 
-int parser::parse() {
+int Parser::parse() {
     int yyn;
     /// Length of the RHS of the rule being reduced.
     int yylen = 0;
@@ -443,7 +444,7 @@ int parser::parse() {
             try
 #endif // YY_EXCEPTIONS
             {
-                symbol_type yylookahead(yylex(drv));
+                symbol_type yylookahead(yylex(_driver));
                 yyla.move(yylookahead);
             }
 #if YY_EXCEPTIONS
@@ -544,92 +545,92 @@ int parser::parse() {
             {
                 switch(yyn) {
                 case 2: // unit: assignments exp
-#line 37 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 46 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
-                    drv.result = yystack_[0].value.as<int>();
+                    _driver.result = yystack_[0].value.as<int>();
                 }
-#line 614 "parser.cpp"
+#line 615 "parser.cpp"
                 break;
 
                 case 3: // assignments: %empty
-#line 40 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 49 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                 }
-#line 620 "parser.cpp"
+#line 621 "parser.cpp"
                 break;
 
                 case 4: // assignments: assignments assignment
-#line 41 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 50 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                 }
-#line 626 "parser.cpp"
+#line 627 "parser.cpp"
                 break;
 
                 case 5: // assignment: "identifier" ":=" exp
-#line 44 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 53 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
-                    drv.variables[yystack_[2].value.as<std::string>()] = yystack_[0].value.as<int>();
+                    _driver.variables[yystack_[2].value.as<std::string>()] = yystack_[0].value.as<int>();
                 }
-#line 632 "parser.cpp"
+#line 633 "parser.cpp"
                 break;
 
                 case 6: // exp: "number"
-#line 49 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 58 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[0].value.as<int>();
                 }
-#line 638 "parser.cpp"
+#line 639 "parser.cpp"
                 break;
 
                 case 7: // exp: "identifier"
-#line 50 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 59 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
-                    yylhs.value.as<int>() = drv.variables[yystack_[0].value.as<std::string>()];
+                    yylhs.value.as<int>() = _driver.variables[yystack_[0].value.as<std::string>()];
                 }
-#line 644 "parser.cpp"
+#line 645 "parser.cpp"
                 break;
 
                 case 8: // exp: exp "+" exp
-#line 51 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 60 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[2].value.as<int>() + yystack_[0].value.as<int>();
                 }
-#line 650 "parser.cpp"
+#line 651 "parser.cpp"
                 break;
 
                 case 9: // exp: exp "-" exp
-#line 52 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 61 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[2].value.as<int>() - yystack_[0].value.as<int>();
                 }
-#line 656 "parser.cpp"
+#line 657 "parser.cpp"
                 break;
 
                 case 10: // exp: exp "*" exp
-#line 53 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 62 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[2].value.as<int>() * yystack_[0].value.as<int>();
                 }
-#line 662 "parser.cpp"
+#line 663 "parser.cpp"
                 break;
 
                 case 11: // exp: exp "/" exp
-#line 54 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 63 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[2].value.as<int>() / yystack_[0].value.as<int>();
                 }
-#line 668 "parser.cpp"
+#line 669 "parser.cpp"
                 break;
 
                 case 12: // exp: "(" exp ")"
-#line 55 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 64 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[1].value.as<int>();
                 }
-#line 674 "parser.cpp"
+#line 675 "parser.cpp"
                 break;
 
-#line 678 "parser.cpp"
+#line 679 "parser.cpp"
 
                 default:
                     break;
@@ -785,12 +786,12 @@ int parser::parse() {
 #endif // YY_EXCEPTIONS
 }
 
-void parser::error(const syntax_error & yyexc) {
+void Parser::error(const syntax_error & yyexc) {
     error(yyexc.location, yyexc.what());
 }
 
 const char *
-parser::symbol_name(symbol_kind_type yysymbol) {
+Parser::symbol_name(symbol_kind_type yysymbol) {
     static const char * const yy_sname[] =
         {
             "end of file", "error", "invalid token", ":=", "-", "+", "*", "/", "(",
@@ -799,11 +800,11 @@ parser::symbol_name(symbol_kind_type yysymbol) {
     return yy_sname[yysymbol];
 }
 
-// parser::context.
-parser::context::context(const parser & yyparser, const symbol_type & yyla)
+// Parser::context.
+Parser::context::context(const Parser & yyparser, const symbol_type & yyla)
     : yyparser_(yyparser), yyla_(yyla) {}
 
-int parser::context::expected_tokens(symbol_kind_type yyarg[], int yyargn) const {
+int Parser::context::expected_tokens(symbol_kind_type yyarg[], int yyargn) const {
     // Actual number of expected tokens
     int yycount = 0;
 
@@ -832,7 +833,7 @@ int parser::context::expected_tokens(symbol_kind_type yyarg[], int yyargn) const
     return yycount;
 }
 
-bool parser::yy_lac_check_(symbol_kind_type yytoken) const {
+bool Parser::yy_lac_check_(symbol_kind_type yytoken) const {
     // Logically, the yylac_stack's lifetime is confined to this function.
     // Clear it, to get rid of potential left-overs from previous call.
     yylac_stack_.clear();
@@ -896,7 +897,7 @@ bool parser::yy_lac_check_(symbol_kind_type yytoken) const {
 }
 
 // Establish the initial context if no initial context currently exists.
-bool parser::yy_lac_establish_(symbol_kind_type yytoken) {
+bool Parser::yy_lac_establish_(symbol_kind_type yytoken) {
     /* Establish the initial context for the current lookahead if no initial
        context is currently established.
 
@@ -933,7 +934,7 @@ bool parser::yy_lac_establish_(symbol_kind_type yytoken) {
 }
 
 // Discard any previous initial lookahead context.
-void parser::yy_lac_discard_(const char * event) {
+void Parser::yy_lac_discard_(const char * event) {
     /* Discard any previous initial lookahead context because of Event,
        which may be a lookahead change or an invalidation of the currently
        established initial context for the current lookahead.
@@ -952,7 +953,7 @@ void parser::yy_lac_discard_(const char * event) {
     }
 }
 
-int parser::yy_syntax_error_arguments_(const context & yyctx,
+int Parser::yy_syntax_error_arguments_(const context & yyctx,
                                        symbol_kind_type yyarg[], int yyargn) const {
     /* There are many possibilities here to consider:
        - If this state is a consistent state with a default action, then
@@ -988,7 +989,7 @@ int parser::yy_syntax_error_arguments_(const context & yyctx,
 
 // Generate an error message.
 std::string
-parser::yysyntax_error_(const context & yyctx) const {
+Parser::yysyntax_error_(const context & yyctx) const {
     // Its maximum.
     enum { YYARGS_MAX = 5 };
     // Arguments of yyformat.
@@ -1024,75 +1025,75 @@ parser::yysyntax_error_(const context & yyctx) const {
     return yyres;
 }
 
-const signed char parser::yypact_ninf_ = -5;
+const signed char Parser::yypact_ninf_ = -5;
 
-const signed char parser::yytable_ninf_ = -1;
+const signed char Parser::yytable_ninf_ = -1;
 
 const signed char
-    parser::yypact_[] =
+    Parser::yypact_[] =
         {
             -5, 5, 9, -5, 13, 15, -5, -5, 8, -5,
             -3, 13, 13, 13, 13, 13, -5, 8, 19, 19,
             -5, -5};
 
 const signed char
-    parser::yydefact_[] =
+    Parser::yydefact_[] =
         {
             3, 0, 0, 1, 0, 7, 6, 4, 2, 7,
             0, 0, 0, 0, 0, 0, 12, 5, 9, 8,
             10, 11};
 
 const signed char
-    parser::yypgoto_[] =
+    Parser::yypgoto_[] =
         {
             -5, -5, -5, -5, -4};
 
 const signed char
-    parser::yydefgoto_[] =
+    Parser::yydefgoto_[] =
         {
             0, 1, 2, 7, 8};
 
 const signed char
-    parser::yytable_[] =
+    Parser::yytable_[] =
         {
             10, 12, 13, 14, 15, 3, 16, 17, 18, 19,
             20, 21, 12, 13, 14, 15, 0, 4, 11, 5,
             6, 4, 0, 9, 6, 14, 15};
 
 const signed char
-    parser::yycheck_[] =
+    Parser::yycheck_[] =
         {
             4, 4, 5, 6, 7, 0, 9, 11, 12, 13,
             14, 15, 4, 5, 6, 7, -1, 8, 3, 10,
             11, 8, -1, 10, 11, 6, 7};
 
 const signed char
-    parser::yystos_[] =
+    Parser::yystos_[] =
         {
             0, 13, 14, 0, 8, 10, 11, 15, 16, 10,
             16, 3, 4, 5, 6, 7, 9, 16, 16, 16,
             16, 16};
 
 const signed char
-    parser::yyr1_[] =
+    Parser::yyr1_[] =
         {
             0, 12, 13, 14, 14, 15, 16, 16, 16, 16,
             16, 16, 16};
 
 const signed char
-    parser::yyr2_[] =
+    Parser::yyr2_[] =
         {
             0, 2, 2, 0, 2, 3, 1, 1, 3, 3,
             3, 3, 3};
 
 #if YYDEBUG
 const signed char
-    parser::yyrline_[] =
+    Parser::yyrline_[] =
         {
-            0, 37, 37, 40, 41, 44, 49, 50, 51, 52,
-            53, 54, 55};
+            0, 46, 46, 49, 50, 53, 58, 59, 60, 61,
+            62, 63, 64};
 
-void parser::yy_stack_print_() const {
+void Parser::yy_stack_print_() const {
     *yycdebug_ << "Stack now";
     for(stack_type::const_iterator
             i = yystack_.begin(),
@@ -1102,7 +1103,7 @@ void parser::yy_stack_print_() const {
     *yycdebug_ << '\n';
 }
 
-void parser::yy_reduce_print_(int yyrule) const {
+void Parser::yy_reduce_print_(int yyrule) const {
     int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
     // Print the symbols being reduced, and their result.
@@ -1115,11 +1116,12 @@ void parser::yy_reduce_print_(int yyrule) const {
 }
 #endif // YYDEBUG
 
-} // namespace yy
-#line 1243 "parser.cpp"
+#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+}} // namespace CINT::PreProcess
+#line 1245 "parser.cpp"
 
-#line 56 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+#line 65 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 
-void yy::parser::error(const location_type & l, const std::string & m) {
+void CINT::PreProcess::Parser::error(const location_type & l, const std::string & m) {
     std::cerr << l << ": " << m << '\n';
 }

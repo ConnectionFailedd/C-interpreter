@@ -32,7 +32,7 @@
 
 /**
  ** \file location.hh
- ** Define the yy::location class.
+ ** Define the  CINT::PreProcess ::location class.
  */
 
 #ifndef YY_YY_LOCATION_HH_INCLUDED
@@ -53,8 +53,9 @@
 #endif
 #endif
 
-namespace yy {
-#line 58 "location.hh"
+#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+namespace CINT { namespace PreProcess {
+#line 59 "location.hh"
 
 /// A point in a source file.
 class position {
@@ -262,7 +263,8 @@ operator<<(std::basic_ostream<YYChar> & ostr, const location & loc) {
     return ostr;
 }
 
-} // namespace yy
-#line 303 "location.hh"
+#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
+}} // namespace CINT::PreProcess
+#line 305 "location.hh"
 
 #endif // !YY_YY_LOCATION_HH_INCLUDED
