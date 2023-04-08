@@ -1,6 +1,3 @@
-#line 1 "lexer.cpp"
-
-#line 3 "lexer.cpp"
 
 #define YY_INT_ALIGNED short int
 
@@ -522,8 +519,6 @@ static const flex_int16_t yy_rule_linenum[13] =
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char * yytext;
-#line 1 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-#line 2 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
 #include "driver.hpp"
 #include "parser.hpp"
 #include <cerrno>
@@ -531,18 +526,12 @@ char * yytext;
 #include <cstdlib>
 #include <cstring> // strerror
 #include <string>
-#line 550 "lexer.cpp"
 #define YY_NO_INPUT 1
-#line 12 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
 // A number symbol corresponding to the value in S.
 CINT::PreProcess::Parser::symbol_type
 make_NUMBER(const std::string & s, const CINT::PreProcess::Parser::location_type & loc);
-#line 556 "lexer.cpp"
-#line 20 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
 // Code run each time a pattern is matched.
 #define YY_USER_ACTION loc.columns(yyleng);
-#line 560 "lexer.cpp"
-#line 561 "lexer.cpp"
 
 #define INITIAL 0
 
@@ -815,16 +804,12 @@ YY_DECL {
     }
 
     {
-/* %% [7.0] user's declarations go here */
-#line 23 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
+        /* %% [7.0] user's declarations go here */
 
-#line 26 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
         // A handy shortcut to the location held by the driver.
         CINT::PreProcess::location & loc = _driver.location;
         // Code run each time yylex is called.
         loc.step();
-
-#line 848 "lexer.cpp"
 
         while(/*CONSTCOND*/ 1) /* loops until end-of-file is reached */
         {
@@ -896,78 +881,62 @@ YY_DECL {
 
             case 1:
                 YY_RULE_SETUP
-#line 31 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 loc.step();
                 YY_BREAK
             case 2:
                 /* rule 2 can match eol */
                 YY_RULE_SETUP
-#line 32 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 loc.lines(yyleng);
                 loc.step();
                 YY_BREAK
             case 3:
                 YY_RULE_SETUP
-#line 33 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 return CINT::PreProcess::Parser::make_MINUS(loc);
                 YY_BREAK
             case 4:
                 YY_RULE_SETUP
-#line 34 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 return CINT::PreProcess::Parser::make_PLUS(loc);
                 YY_BREAK
             case 5:
                 YY_RULE_SETUP
-#line 35 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 return CINT::PreProcess::Parser::make_STAR(loc);
                 YY_BREAK
             case 6:
                 YY_RULE_SETUP
-#line 36 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 return CINT::PreProcess::Parser::make_SLASH(loc);
                 YY_BREAK
             case 7:
                 YY_RULE_SETUP
-#line 37 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 return CINT::PreProcess::Parser::make_LPAREN(loc);
                 YY_BREAK
             case 8:
                 YY_RULE_SETUP
-#line 38 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 return CINT::PreProcess::Parser::make_RPAREN(loc);
                 YY_BREAK
             case 9:
                 YY_RULE_SETUP
-#line 39 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 return CINT::PreProcess::Parser::make_ASSIGN(loc);
                 YY_BREAK
             case 10:
                 YY_RULE_SETUP
-#line 41 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 return make_NUMBER(yytext, loc);
                 YY_BREAK
             case 11:
                 YY_RULE_SETUP
-#line 42 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 return CINT::PreProcess::Parser::make_IDENTIFIER(yytext, loc);
                 YY_BREAK
             case 12:
-                YY_RULE_SETUP
-#line 43 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
-                {
+                YY_RULE_SETUP {
                     throw CINT::PreProcess::Parser::syntax_error(loc, "invalid character: " + std::string(yytext));
                 }
                 YY_BREAK
             case YY_STATE_EOF(INITIAL):
-#line 47 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 return CINT::PreProcess::Parser::make_YYEOF(loc);
                 YY_BREAK
             case 13:
                 YY_RULE_SETUP
-#line 48 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
                 ECHO;
                 YY_BREAK
-#line 997 "lexer.cpp"
 
             case YY_END_OF_BUFFER: {
                 /* Amount of text matched not including the EOB char. */
@@ -2001,8 +1970,6 @@ void yyfree(void * ptr) {
 /* %endif */
 
 /* %ok-for-header */
-
-#line 48 "/Users/__nya__/Desktop/C-interpreter/parser/lexer.ll"
 
 namespace CINT {
 namespace PreProcess {

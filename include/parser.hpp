@@ -44,7 +44,6 @@
 #ifndef YY_YY_PARSER_HPP_INCLUDED
 #define YY_YY_PARSER_HPP_INCLUDED
 // "%code requires" blocks.
-#line 11 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 
 #include <string>
 namespace CINT {
@@ -54,8 +53,6 @@ class Driver;
 
 }
 } // namespace CINT::PreProcess
-
-#line 60 "parser.hpp"
 
 #include <cassert>
 #include <cstdlib> // std::abort
@@ -193,9 +190,7 @@ class Driver;
 #define YYDEBUG 1
 #endif
 
-#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 namespace CINT { namespace PreProcess {
-#line 201 "parser.hpp"
 
 /// A Bison parser.
 class Parser {
@@ -1306,8 +1301,6 @@ Parser::by_kind::type_get() const YY_NOEXCEPT {
     return this->kind();
 }
 
-#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 }} // namespace CINT::PreProcess
-#line 1491 "parser.hpp"
 
 #endif // !YY_YY_PARSER_HPP_INCLUDED

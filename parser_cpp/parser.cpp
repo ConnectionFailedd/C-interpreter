@@ -37,11 +37,8 @@
 #include "parser.hpp"
 
 // Unqualified %code blocks.
-#line 27 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 
 #include "driver.hpp"
-
-#line 50 "parser.cpp"
 
 #ifndef YY_
 #if defined YYENABLE_NLS && YYENABLE_NLS
@@ -128,9 +125,7 @@
 #define YYERROR goto yyerrorlab
 #define YYRECOVERING() (!!yyerrstatus_)
 
-#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 namespace CINT { namespace PreProcess {
-#line 143 "parser.cpp"
 
 /// Build a parser object.
 Parser::Parser(CINT::PreProcess::Driver & _driver_yyarg)
@@ -289,28 +284,19 @@ void Parser::yy_print_(std::ostream & yyo, const basic_symbol<Base> & yysym) con
             << yysym.location << ": ";
         switch(yykind) {
         case symbol_kind::S_IDENTIFIER: // "identifier"
-#line 43 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
         {
             yyo << yysym.value.template as<std::string>();
-        }
-#line 331 "parser.cpp"
-        break;
+        } break;
 
         case symbol_kind::S_NUMBER: // "number"
-#line 43 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
         {
             yyo << yysym.value.template as<int>();
-        }
-#line 337 "parser.cpp"
-        break;
+        } break;
 
         case symbol_kind::S_exp: // exp
-#line 43 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
         {
             yyo << yysym.value.template as<int>();
-        }
-#line 343 "parser.cpp"
-        break;
+        } break;
 
         default:
             break;
@@ -545,92 +531,57 @@ int Parser::parse() {
             {
                 switch(yyn) {
                 case 2: // unit: assignments exp
-#line 46 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     _driver.result = yystack_[0].value.as<int>();
-                }
-#line 615 "parser.cpp"
-                break;
+                } break;
 
                 case 3: // assignments: %empty
-#line 49 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
-                }
-#line 621 "parser.cpp"
-                break;
+                } break;
 
                 case 4: // assignments: assignments assignment
-#line 50 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
-                }
-#line 627 "parser.cpp"
-                break;
+                } break;
 
                 case 5: // assignment: "identifier" ":=" exp
-#line 53 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     _driver.variables[yystack_[2].value.as<std::string>()] = yystack_[0].value.as<int>();
-                }
-#line 633 "parser.cpp"
-                break;
+                } break;
 
                 case 6: // exp: "number"
-#line 58 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[0].value.as<int>();
-                }
-#line 639 "parser.cpp"
-                break;
+                } break;
 
                 case 7: // exp: "identifier"
-#line 59 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = _driver.variables[yystack_[0].value.as<std::string>()];
-                }
-#line 645 "parser.cpp"
-                break;
+                } break;
 
                 case 8: // exp: exp "+" exp
-#line 60 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[2].value.as<int>() + yystack_[0].value.as<int>();
-                }
-#line 651 "parser.cpp"
-                break;
+                } break;
 
                 case 9: // exp: exp "-" exp
-#line 61 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[2].value.as<int>() - yystack_[0].value.as<int>();
-                }
-#line 657 "parser.cpp"
-                break;
+                } break;
 
                 case 10: // exp: exp "*" exp
-#line 62 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[2].value.as<int>() * yystack_[0].value.as<int>();
-                }
-#line 663 "parser.cpp"
-                break;
+                } break;
 
                 case 11: // exp: exp "/" exp
-#line 63 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[2].value.as<int>() / yystack_[0].value.as<int>();
-                }
-#line 669 "parser.cpp"
-                break;
+                } break;
 
                 case 12: // exp: "(" exp ")"
-#line 64 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
                 {
                     yylhs.value.as<int>() = yystack_[1].value.as<int>();
-                }
-#line 675 "parser.cpp"
-                break;
-
-#line 679 "parser.cpp"
+                } break;
 
                 default:
                     break;
@@ -1116,11 +1067,7 @@ void Parser::yy_reduce_print_(int yyrule) const {
 }
 #endif // YYDEBUG
 
-#line 4 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 }} // namespace CINT::PreProcess
-#line 1245 "parser.cpp"
-
-#line 65 "/Users/__nya__/Desktop/C-interpreter/parser/parser.yy"
 
 void CINT::PreProcess::Parser::error(const location_type & l, const std::string & m) {
     std::cerr << l << ": " << m << '\n';
