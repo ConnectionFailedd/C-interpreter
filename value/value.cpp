@@ -3,9 +3,9 @@
 #include "value.hpp"
 
 namespace CINT {
-namespace Value {
 
-auto variables = std::map<CINT::Value::VariableName, CINT::Value::Value>();
+auto Value::variables = std::map<Value::VariableName, std::shared_ptr<Value>>();
 
-}
+const auto Value::NOVALUE = Value(nullptr, true, false);
+
 } // namespace CINT::Value

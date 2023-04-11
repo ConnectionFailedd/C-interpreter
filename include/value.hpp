@@ -9,7 +9,6 @@
 /* ---------------------------------------------------------------------------------------------------- */
 
 namespace CINT {
-namespace Value {
 
 /* ---------------------------------------------------------------------------------------------------- */
 
@@ -23,19 +22,21 @@ private:
     const bool __isLeft;
 
 public:
+    using VariableName = Name;
+    static std::map<VariableName, std::shared_ptr<Value>> variables;
+
+    const static Value NOVALUE;
+
+public:
     inline Value(std::shared_ptr<Type::Type> _type, bool _isConst, bool _isLeft) : __type(_type), __valuePointer(::operator new(_type->size(), _type->align())), __isConst(_isConst), __isLeft(_isLeft) {}
-    inline ~Value() { ::operator delete(__valuePointer, __type->size(), __type->align()); }
+    inline ~Value() {
+        if(__valuePointer != nullptr) ::operator delete(__valuePointer, __type->size(), __type->align());
+    }
 };
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-using VariableName = Name;
-extern std::map<VariableName, Value> variables;
-
-/* ---------------------------------------------------------------------------------------------------- */
-
-}
-} // namespace CINT::Value
+} // namespace CINT
 
 /* ---------------------------------------------------------------------------------------------------- */
 
