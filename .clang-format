@@ -166,7 +166,7 @@ SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
 
 # 在Template 关键字后面添加空格
-SpaceAfterTemplateKeyword: true
+SpaceAfterTemplateKeyword: false
 
 # 在赋值运算符之前添加空格
 SpaceBeforeAssignmentOperators: true
