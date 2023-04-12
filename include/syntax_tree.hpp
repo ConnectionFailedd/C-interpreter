@@ -78,11 +78,7 @@ private:
         std::shared_ptr<Node> __previousExpression, __nextSemicolon;
 
     public:
-        inline virtual std::shared_ptr<Value> evaluate() override final {
-            __previousExpression->evaluate();
-            __nextSemicolon->evaluate();
-            return Value::NOVALUE;
-        }
+        virtual std::shared_ptr<Value> evaluate() override final;
     };
 
 private:
@@ -93,9 +89,6 @@ public:
     inline std::shared_ptr<Value> evaluate() { return __root->evaluate(); }
 };
 
-/*
-
-*/
 } // namespace CINT
 
 #endif

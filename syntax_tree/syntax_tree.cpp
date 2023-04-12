@@ -25,24 +25,60 @@ std::shared_ptr<Value> SyntaxTree::UserDefinedFunctionNode::evaluate() {
 }
 
 std::shared_ptr<Value> SyntaxTree::IfNode::evaluate() {
-    if(__condition->evaluate()->get_value<bool>()) __trueBranch->evaluate();
-    else __falseBranch->evaluate();
+    if(__condition->evaluate()->get_value<bool>()) {
+        auto res = __trueBranch->evaluate();
+        if(res->is_signal()) return res;
+    }
+
+    auto res = __falseBranch->evaluate();
+    if(res->is_signal()) return res;
+
     return Value::NOVALUE;
 }
 
 std::shared_ptr<Value> SyntaxTree::WhileNode::evaluate() {
-    // break & continue ?
-    while(__condition->evaluate()->get_value<bool>()) __trueBranch->evaluate();
-    __falseBranch->evaluate();
+    while(__condition->evaluate()->get_value<bool>()) {
+        auto res = __trueBranch->evaluate();
+        if(res->is_signal()) {
+            if(res == SignalValue::BREAK) break;
+            if(res == SignalValue::CONTINUE)
+                continue;
+            else
+                return res;
+        }
+    }
+
+    auto res = __falseBranch->evaluate();
+    if(res->is_signal()) return res;
+
     return Value::NOVALUE;
 }
 
 std::shared_ptr<Value> SyntaxTree::ForNode::evaluate() {
-    // break & continue ?
     for(__initialization->evaluate(); __condition->evaluate()->get_value<bool>(); __increment->evaluate()) {
-        __trueBranch->evaluate();
+        auto res = __trueBranch->evaluate();
+        if(res->is_signal()) {
+            if(res == SignalValue::BREAK) break;
+            if(res == SignalValue::CONTINUE)
+                continue;
+            else
+                return res;
+        }
     }
-    __falseBranch->evaluate();
+
+    auto res = __falseBranch->evaluate();
+    if(res->is_signal()) return res;
+
+    return Value::NOVALUE;
+}
+
+std::shared_ptr<Value> SyntaxTree::SemicolonNode::evaluate() {
+    auto res = __previousExpression->evaluate();
+    if(res->is_signal()) return res;
+
+    res = __nextSemicolon->evaluate();
+    if(res->is_signal()) return res;
+
     return Value::NOVALUE;
 }
 
