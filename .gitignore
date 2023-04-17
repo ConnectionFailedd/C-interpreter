@@ -1,2 +1,6 @@
 build
 .cache
+location.hh
+parser.hpp
+lexer.cpp
+parser.cpp
