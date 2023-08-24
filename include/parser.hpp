@@ -217,7 +217,7 @@ public:
               yytypeid_(YY_NULLPTR) {}
 
         /// Construct and fill.
-        template <typename T>
+        template<typename T>
         value_type(YY_RVREF(T) t)
             : yytypeid_(&typeid(T)) {
             YY_ASSERT(sizeof(T) <= size);
@@ -238,7 +238,7 @@ public:
 
 #if 201103L <= YY_CPLUSPLUS
         /// Instantiate a \a T in here from \a t.
-        template <typename T, typename... U>
+        template<typename T, typename... U>
         T &
         emplace(U &&... u) {
             YY_ASSERT(!yytypeid_);
@@ -248,7 +248,7 @@ public:
         }
 #else
         /// Instantiate an empty \a T in here.
-        template <typename T>
+        template<typename T>
         T &
         emplace() {
             YY_ASSERT(!yytypeid_);
@@ -258,7 +258,7 @@ public:
         }
 
         /// Instantiate a \a T in here from \a t.
-        template <typename T>
+        template<typename T>
         T &
         emplace(const T & t) {
             YY_ASSERT(!yytypeid_);
@@ -270,7 +270,7 @@ public:
 
         /// Instantiate an empty \a T in here.
         /// Obsolete, use emplace.
-        template <typename T>
+        template<typename T>
         T &
         build() {
             return emplace<T>();
@@ -278,14 +278,14 @@ public:
 
         /// Instantiate a \a T in here from \a t.
         /// Obsolete, use emplace.
-        template <typename T>
+        template<typename T>
         T &
         build(const T & t) {
             return emplace<T>(t);
         }
 
         /// Accessor to a built \a T.
-        template <typename T>
+        template<typename T>
         T &
         as() YY_NOEXCEPT {
             YY_ASSERT(yytypeid_);
@@ -295,7 +295,7 @@ public:
         }
 
         /// Const accessor to a built \a T (for %printer).
-        template <typename T>
+        template<typename T>
         const T &
         as() const YY_NOEXCEPT {
             YY_ASSERT(yytypeid_);
@@ -312,7 +312,7 @@ public:
         /// should not be the variant's responsibility.
         /// Swapping between built and (possibly) non-built is done with
         /// self_type::move ().
-        template <typename T>
+        template<typename T>
         void
         swap(self_type & that) YY_NOEXCEPT {
             YY_ASSERT(yytypeid_);
@@ -323,7 +323,7 @@ public:
         /// Move the content of \a that to this.
         ///
         /// Destroys \a that.
-        template <typename T>
+        template<typename T>
         void
         move(self_type & that) {
 #if 201103L <= YY_CPLUSPLUS
@@ -337,7 +337,7 @@ public:
 
 #if 201103L <= YY_CPLUSPLUS
         /// Move the content of \a that to this.
-        template <typename T>
+        template<typename T>
         void
         move(self_type && that) {
             emplace<T>(std::move(that.as<T>()));
@@ -346,14 +346,14 @@ public:
 #endif
 
         /// Copy the content of \a that to this.
-        template <typename T>
+        template<typename T>
         void
         copy(const self_type & that) {
             emplace<T>(that.as<T>());
         }
 
         /// Destroy the stored \a T.
-        template <typename T>
+        template<typename T>
         void
         destroy() {
             as<T>().~T();
@@ -369,7 +369,7 @@ public:
 #endif
 
         /// Accessor to raw memory as \a T.
-        template <typename T>
+        template<typename T>
         T *
         yyas_() YY_NOEXCEPT {
             void * yyp = yyraw_;
@@ -377,7 +377,7 @@ public:
         }
 
         /// Const accessor to raw memory as \a T.
-        template <typename T>
+        template<typename T>
         const T *
         yyas_() const YY_NOEXCEPT {
             const void * yyp = yyraw_;
@@ -493,7 +493,7 @@ public:
     /// via kind ().
     ///
     /// Provide access to semantic value and location.
-    template <typename Base>
+    template<typename Base>
     struct basic_symbol : Base {
         /// Alias to Base.
         typedef Base super_type;
@@ -995,7 +995,7 @@ private:
     /// \brief Display a symbol kind, value and location.
     /// \param yyo    The output stream.
     /// \param yysym  The symbol.
-    template <typename Base>
+    template<typename Base>
     void yy_print_(std::ostream & yyo, const basic_symbol<Base> & yysym) const;
 #endif
 
@@ -1003,7 +1003,7 @@ private:
     /// \param yymsg     Why this token is reclaimed.
     ///                  If null, print nothing.
     /// \param yysym     The symbol.
-    template <typename Base>
+    template<typename Base>
     void yy_destroy_(const char * yymsg, basic_symbol<Base> & yysym) const;
 
 private:
@@ -1062,7 +1062,7 @@ private:
     };
 
     /// A stack with random access from its top.
-    template <typename T, typename S = std::vector<T>>
+    template<typename T, typename S = std::vector<T>>
     class stack {
     public:
         // Hide our reversed order.
@@ -1214,7 +1214,7 @@ Parser::yytranslate_(int t) YY_NOEXCEPT {
 }
 
 // basic_symbol.
-template <typename Base>
+template<typename Base>
 Parser::basic_symbol<Base>::basic_symbol(const basic_symbol & that)
     : Base(that), value(), location(that.location) {
     switch(this->kind()) {
@@ -1232,18 +1232,18 @@ Parser::basic_symbol<Base>::basic_symbol(const basic_symbol & that)
     }
 }
 
-template <typename Base>
+template<typename Base>
 Parser::symbol_kind_type
 Parser::basic_symbol<Base>::type_get() const YY_NOEXCEPT {
     return this->kind();
 }
 
-template <typename Base>
+template<typename Base>
 bool Parser::basic_symbol<Base>::empty() const YY_NOEXCEPT {
     return this->kind() == symbol_kind::S_YYEMPTY;
 }
 
-template <typename Base>
+template<typename Base>
 void Parser::basic_symbol<Base>::move(basic_symbol & s) {
     super_type::move(s);
     switch(this->kind()) {

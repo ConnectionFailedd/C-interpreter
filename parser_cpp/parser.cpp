@@ -264,14 +264,14 @@ Parser::stack_symbol_type::operator=(stack_symbol_type & that) {
 }
 #endif
 
-template <typename Base>
+template<typename Base>
 void Parser::yy_destroy_(const char * yymsg, basic_symbol<Base> & yysym) const {
     if(yymsg)
         YY_SYMBOL_PRINT(yymsg, yysym);
 }
 
 #if YYDEBUG
-template <typename Base>
+template<typename Base>
 void Parser::yy_print_(std::ostream & yyo, const basic_symbol<Base> & yysym) const {
     std::ostream & yyoutput = yyo;
     YY_USE(yyoutput);

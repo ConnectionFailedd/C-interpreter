@@ -11,7 +11,7 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}-std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}-std=c++17 -g")
 
 include_directories(include)
 add_subdirectory(parser)
@@ -21,4 +21,4 @@ add_subdirectory(value)
 add_subdirectory(syntax_tree)
 add_subdirectory(function)
 
-target_link_libraries(CINT PARSER)
+target_link_libraries(CINT UTILS)

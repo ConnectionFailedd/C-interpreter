@@ -137,7 +137,7 @@ operator-(position res, position::counter_type width) {
  ** \param ostr the destination output stream
  ** \param pos a reference to the position to redirect
  */
-template <typename YYChar>
+template<typename YYChar>
 std::basic_ostream<YYChar> &
 operator<<(std::basic_ostream<YYChar> & ostr, const position & pos) {
     if(pos.filename)
@@ -245,7 +245,7 @@ operator-(location res, location::counter_type width) {
  **
  ** Avoid duplicate information.
  */
-template <typename YYChar>
+template<typename YYChar>
 std::basic_ostream<YYChar> &
 operator<<(std::basic_ostream<YYChar> & ostr, const location & loc) {
     location::counter_type end_col = 0 < loc.end.column ? loc.end.column - 1 : 0;

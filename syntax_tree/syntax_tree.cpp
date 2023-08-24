@@ -1,7 +1,6 @@
 #include <memory>
 #include <vector>
 
-#include "function.hpp"
 #include "syntax_tree.hpp"
 #include "type.hpp"
 #include "value.hpp"
@@ -21,65 +20,62 @@ std::shared_ptr<Value> SyntaxTree::UserDefinedFunctionNode::evaluate() {
     for(auto child : __children) {
         arguments.push_back(child->evaluate());
     }
-    return __userDefinedFunction->evaluate(arguments);
+    return __userDefinedFunction->evaluate();
 }
 
 std::shared_ptr<Value> SyntaxTree::IfNode::evaluate() {
     if(__condition->evaluate()->get_value<bool>()) {
-        auto res = __trueBranch->evaluate();
-        if(res->is_signal()) return res;
+        return __trueBranch->evaluate();
     }
 
-    auto res = __falseBranch->evaluate();
-    if(res->is_signal()) return res;
-
-    return Value::NOVALUE;
+    return __falseBranch->evaluate();
 }
 
 std::shared_ptr<Value> SyntaxTree::WhileNode::evaluate() {
     while(__condition->evaluate()->get_value<bool>()) {
         auto res = __trueBranch->evaluate();
-        if(res->is_signal()) {
-            if(res == SignalValue::BREAK) break;
-            if(res == SignalValue::CONTINUE)
-                continue;
-            else
-                return res;
+        if(breakSignal) {
+            breakSignal = false;
+            break;
+        }
+        if(continueSignal) {
+            continueSignal = false;
+            continue;
+        }
+        if(returnSignal) {
+            return res;
         }
     }
 
-    auto res = __falseBranch->evaluate();
-    if(res->is_signal()) return res;
-
-    return Value::NOVALUE;
+    return __falseBranch->evaluate();
 }
 
 std::shared_ptr<Value> SyntaxTree::ForNode::evaluate() {
     for(__initialization->evaluate(); __condition->evaluate()->get_value<bool>(); __increment->evaluate()) {
         auto res = __trueBranch->evaluate();
-        if(res->is_signal()) {
-            if(res == SignalValue::BREAK) break;
-            if(res == SignalValue::CONTINUE)
-                continue;
-            else
-                return res;
+        if(breakSignal) {
+            breakSignal = false;
+            break;
+        }
+        if(continueSignal) {
+            continueSignal = false;
+            continue;
+        }
+        if(returnSignal) {
+            return res;
         }
     }
 
-    auto res = __falseBranch->evaluate();
-    if(res->is_signal()) return res;
-
-    return Value::NOVALUE;
+    return __falseBranch->evaluate();
 }
 
 std::shared_ptr<Value> SyntaxTree::SemicolonNode::evaluate() {
     auto res = __previousExpression->evaluate();
-    if(res->is_signal()) return res;
+    if(breakSignal || continueSignal || returnSignal) {
+        return res;
+    }
 
-    res = __nextSemicolon->evaluate();
-    if(res->is_signal()) return res;
-
-    return Value::NOVALUE;
+    return __nextSemicolon->evaluate();
 }
 
 } // namespace CINT

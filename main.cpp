@@ -1,16 +1,18 @@
-#include "driver.hpp"
+
+#include "name.hpp"
+#include "scope.hpp"
+#include "syntax_tree.hpp"
+#include "type.hpp"
+#include "value.hpp"
+#include <memory>
 
 int main(int argc, char * argv[]) {
-    int res = 0;
-    CINT::PreProcess::Driver drv;
-    for(int i = 1; i < argc; ++i)
-        if(argv[i] == std::string("-p"))
-            drv.trace_parsing = true;
-        else if(argv[i] == std::string("-s"))
-            drv.trace_scanning = true;
-        else if(!drv.parse(argv[i]))
-            std::cout << drv.result << '\n';
-        else
-            res = 1;
-    return res;
+    auto int_type = std::make_shared<CINT::Type::BuiltInType>(4, std::align_val_t(4), CINT::Name(CINT::Scope::currentScope, "int"));
+    auto value = std::make_shared<CINT::Value>(int_type, false, false);
+    auto fixedValueNode = CINT::SyntaxTree::make_fixed_value_node(value);
+    auto returnNode = CINT::SyntaxTree::make_return_node(fixedValueNode);
+    auto tree = CINT::SyntaxTree(returnNode);
+    CINT::SyntaxTree::functionStack.push(CINT::SyntaxTree::StackNode());
+    tree.evaluate();
+    return 0;
 }

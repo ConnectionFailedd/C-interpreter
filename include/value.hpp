@@ -33,8 +33,6 @@ public:
         if(__valuePointer != nullptr) ::operator delete(__valuePointer, __type->size(), __type->align());
     }
 
-    inline virtual bool is_signal() { return false; }
-
     template<class T>
     inline T get_value() const {
         return *(T *)(__valuePointer);
@@ -44,19 +42,6 @@ public:
     inline bool get_value() const {
         return *(int *)(__valuePointer);
     }
-};
-
-class SignalValue : public Value {
-public:
-    const static std::shared_ptr<SignalValue> NORETURNVALUE;
-    const static std::shared_ptr<SignalValue> BREAK;
-    const static std::shared_ptr<SignalValue> CONTINUE;
-
-public:
-    inline SignalValue(const Value & _value, bool _isReturn) : Value(_value) {}
-    inline ~SignalValue() = default;
-
-    inline virtual bool is_signal() override final { return true; }
 };
 
 /* ---------------------------------------------------------------------------------------------------- */
