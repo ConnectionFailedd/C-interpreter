@@ -1,3 +1,7 @@
 build
 .cache
 .vscode
+location.hh
+parser.hpp
+lexer.cpp
+parser.cpp
