@@ -18,7 +18,7 @@ private:
     const std::string __baseName;
 
 public:
-    const static Name noName;
+    const static Name NONAME;
 
 public:
     Name(const Scope & _scope, const std::string & _baseName) : __scope(_scope), __baseName(_baseName) {}

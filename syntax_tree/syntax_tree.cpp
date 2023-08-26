@@ -9,18 +9,21 @@ namespace CINT {
 
 std::shared_ptr<Value> SyntaxTree::BuiltInFunctionNode::evaluate() {
     auto arguments = std::vector<std::shared_ptr<Value>>();
-    for(auto child : __children) {
-        arguments.push_back(child->evaluate());
+    for(auto argument : __arguments) {
+        arguments.push_back(argument->evaluate());
     }
     return __builtInFunction(arguments);
 }
 
 std::shared_ptr<Value> SyntaxTree::UserDefinedFunctionNode::evaluate() {
     auto arguments = std::vector<std::shared_ptr<Value>>();
-    for(auto child : __children) {
-        arguments.push_back(child->evaluate());
+    for(auto argument : __arguments) {
+        arguments.push_back(argument->evaluate());
     }
-    return __userDefinedFunction->evaluate();
+
+    functionStack.push(arguments, CINT::Value::NOVALUE);
+    __userDefinedFunction->evaluate();
+    return functionStack.get_return_value();
 }
 
 std::shared_ptr<Value> SyntaxTree::IfNode::evaluate() {

@@ -20,9 +20,14 @@ public:
     using TypeName = Name;
 
 public:
-    virtual std::size_t size() const noexcept = 0;
-    virtual std::align_val_t align() const noexcept = 0;
-    virtual const TypeName & name() const noexcept = 0;
+    const static std::shared_ptr<Type> NOTYPE;
+
+public:
+    inline Type() {}
+
+    inline virtual std::size_t size() const noexcept = 0;
+    inline virtual std::align_val_t align() const noexcept = 0;
+    inline virtual const TypeName & name() const noexcept = 0;
 
     inline virtual bool is_builtin_type() const noexcept { return false; }
     inline virtual bool is_aggregated_type() const noexcept { return false; }
@@ -43,6 +48,7 @@ private:
     const TypeName __name;
 
 public:
+    inline BuiltInType(std::size_t _size, std::align_val_t _align, const TypeName & _name) : __size(_size), __align(_align), __name(_name) {}
     inline BuiltInType(std::size_t _size, std::align_val_t _align, TypeName && _name) noexcept : __size(_size), __align(_align), __name(std::move(_name)) {}
 
     inline virtual std::size_t size() const noexcept override final { return __size; }
@@ -82,7 +88,7 @@ public:
 
     inline virtual std::size_t size() const noexcept override final { return sizeof(void *); }
     inline virtual std::align_val_t align() const noexcept override final { return std::align_val_t(alignof(void *)); }
-    inline virtual const TypeName & name() const noexcept override final { return Name::noName; }
+    inline virtual const TypeName & name() const noexcept override final { return Name::NONAME; }
 
     inline virtual bool is_pointer_type() const noexcept override final { return true; }
 };
@@ -97,7 +103,7 @@ public:
 
     inline virtual std::size_t size() const noexcept override final { return sizeof(void *); }
     inline virtual std::align_val_t align() const noexcept override final { return std::align_val_t(alignof(void *)); }
-    inline virtual const TypeName & name() const noexcept override final { return Name::noName; }
+    inline virtual const TypeName & name() const noexcept override final { return Name::NONAME; }
 
     inline virtual bool is_left_reference_type() const noexcept override final { return true; }
 };
@@ -112,7 +118,7 @@ public:
 
     inline virtual std::size_t size() const noexcept override final { return sizeof(void *); }
     inline virtual std::align_val_t align() const noexcept override final { return std::align_val_t(alignof(void *)); }
-    inline virtual const TypeName & name() const noexcept override final { return Name::noName; }
+    inline virtual const TypeName & name() const noexcept override final { return Name::NONAME; }
 
     inline virtual bool is_right_reference_type() const noexcept override final { return true; }
 };
@@ -127,7 +133,7 @@ public:
 
     inline virtual std::size_t size() const noexcept override final { return __baseType->size() * __arraySize; }
     inline virtual std::align_val_t align() const noexcept override final { return __baseType->align(); }
-    inline virtual const TypeName & name() const noexcept override final { return Name::noName; }
+    inline virtual const TypeName & name() const noexcept override final { return Name::NONAME; }
 
     inline virtual bool is_array_type() const noexcept override final { return true; }
 };
