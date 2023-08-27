@@ -43,10 +43,12 @@ public:
 private:
     class SharedPtrTypeCmp {
     public:
-        bool operator()(const std::shared_ptr<Type> & _lhs, const std::shared_ptr<Type> & _rhs) {
-            return _lhs < _rhs;
+        bool operator()(const std::shared_ptr<Type> & _lhs, const std::shared_ptr<Type> & _rhs) const & {
+            return *_lhs < *_rhs;
         }
     };
+
+    static std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp> type_multi_set_init();
 
 public:
     static std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp> typeMultiSet;

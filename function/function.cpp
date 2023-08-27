@@ -1,7 +1,31 @@
+#include <functional>
 #include <memory>
+#include <vector>
 
 #include "function.hpp"
 #include "value.hpp"
+
+namespace CINT::Function {
+
+std::multimap<Signature, std::function<BuiltInFunction>> built_in_function_multi_map_init() {
+    auto res = std::multimap<Signature, std::function<BuiltInFunction>>();
+
+    auto int_type = std::shared_ptr<CINT::Type::Type>();
+    if(CINT::Type::Type::typeMultiSet.find(std::make_shared<CINT::Type::BuiltInType>(0, std::align_val_t(0), CINT::Name("int"))) != CINT::Type::Type::typeMultiSet.end()) {
+        int_type = *CINT::Type::Type::typeMultiSet.find(std::make_shared<CINT::Type::BuiltInType>(0, std::align_val_t(0), CINT::Name("int")));
+    }
+    auto intAddIntIntSignature = Signature(Name("+"), int_type, std::vector({int_type, int_type}));
+    auto intAddIntIntFunction = std::function(BuiltInFunctions::add<int>);
+    res.insert({intAddIntIntSignature, intAddIntIntFunction});
+
+    return res;
+}
+
+std::multimap<Signature, std::shared_ptr<SyntaxTree>> user_defined_function_multi_map_init() {
+    return std::multimap<Signature, std::shared_ptr<SyntaxTree>>();
+}
+
+}
 
 namespace CINT::Function::BuiltInFunctions {
 
