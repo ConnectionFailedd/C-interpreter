@@ -41,6 +41,8 @@ public:
         }
     }
 
+    inline const std::shared_ptr<Type::Type> & get_type() { return __type; }
+
     template<class T>
     inline T get_value() const {
         return *(T *)(__valuePointer);

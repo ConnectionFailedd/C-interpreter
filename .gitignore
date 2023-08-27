@@ -1,6 +1,7 @@
 build
 .cache
 .vscode
+.clang-format
 location.hh
 parser.hpp
 lexer.cpp

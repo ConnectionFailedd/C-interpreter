@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <memory>
 #include <new>
+#include <set>
 #include <vector>
 
 #include "name.hpp"
@@ -36,6 +37,19 @@ public:
     inline virtual bool is_right_reference_type() const noexcept { return false; }
     inline virtual bool is_array_type() const noexcept { return false; }
     inline virtual bool is_type_alias() const noexcept { return false; }
+
+    bool operator<(const Type & _rhs) const & { return name() < _rhs.name(); }
+
+private:
+    class SharedPtrTypeCmp {
+    public:
+        bool operator()(const std::shared_ptr<Type> & _lhs, const std::shared_ptr<Type> & _rhs) {
+            return _lhs < _rhs;
+        }
+    };
+
+public:
+    static std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp> typeMultiSet;
 };
 
 /* ---------------------------------------------------------------------------------------------------- */

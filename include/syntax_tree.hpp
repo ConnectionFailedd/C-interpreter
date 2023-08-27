@@ -83,12 +83,12 @@ private:
 
     class BuiltInFunctionNode : public Node {
     private:
-        std::function<std::shared_ptr<Value>(std::vector<std::shared_ptr<Value>>)> __builtInFunction;
+        std::function<std::shared_ptr<Value>(const std::vector<std::shared_ptr<Value>> &)> __builtInFunction;
 
         std::vector<std::shared_ptr<Node>> __arguments;
 
     public:
-        inline BuiltInFunctionNode(const std::function<std::shared_ptr<Value>(std::vector<std::shared_ptr<Value>>)> & _builtInFunction, const std::vector<std::shared_ptr<Node>> & _arguments) : __builtInFunction(_builtInFunction), __arguments(_arguments) {}
+        inline BuiltInFunctionNode(const std::function<std::shared_ptr<Value>(const std::vector<std::shared_ptr<Value>> &)> & _builtInFunction, const std::vector<std::shared_ptr<Node>> & _arguments) : __builtInFunction(_builtInFunction), __arguments(_arguments) {}
 
         virtual std::shared_ptr<Value> evaluate() override final;
     };
@@ -196,7 +196,7 @@ public:
     inline static std::shared_ptr<Node> make_argument_node(std::size_t _index) {
         return std::make_shared<ArgumentNode>(ArgumentNode(_index));
     }
-    inline static std::shared_ptr<Node> make_built_in_function_node(const std::function<std::shared_ptr<Value>(std::vector<std::shared_ptr<Value>>)> & _builtInFunction, const std::vector<std::shared_ptr<Node>> & _arguments) {
+    inline static std::shared_ptr<Node> make_built_in_function_node(const std::function<std::shared_ptr<Value>(const std::vector<std::shared_ptr<Value>> &)> & _builtInFunction, const std::vector<std::shared_ptr<Node>> & _arguments) {
         return std::make_shared<BuiltInFunctionNode>(BuiltInFunctionNode(_builtInFunction, _arguments));
     }
     inline static std::shared_ptr<Node> make_user_defined_function_node(const std::shared_ptr<SyntaxTree> & _userDefinedFunction, const std::vector<std::shared_ptr<Node>> & _arguments) {
