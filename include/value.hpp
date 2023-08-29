@@ -30,11 +30,11 @@ public:
 
 public:
     inline Value(const std::shared_ptr<Type::Type> & _type, bool _isConst, bool _isLeft) : __type(_type), __valuePointer(::operator new(_type->size(), _type->align())), __isConst(_isConst), __isLeft(_isLeft) {}
-    inline Value(Value && _src) : __type(_src.__type), __isConst(_src.__isConst), __isLeft(_src.__isLeft) {
+    inline Value(Value && _src) noexcept : __type(_src.__type), __isConst(_src.__isConst), __isLeft(_src.__isLeft) {
         __valuePointer = _src.__valuePointer;
         _src.__valuePointer = nullptr;
     }
-    inline ~Value() {
+    inline virtual ~Value() {
         if(__valuePointer != nullptr) {
             ::operator delete(__valuePointer, __type->size(), __type->align());
             __valuePointer = nullptr;
@@ -55,6 +55,15 @@ public:
     template<bool>
     inline bool get_value() const {
         return *(int *)(__valuePointer);
+    }
+
+    inline void reset_value_pointer() { __valuePointer = nullptr; }
+};
+
+class SubValue : public Value {
+public:
+    inline virtual ~SubValue() override {
+        reset_value_pointer();
     }
 };
 

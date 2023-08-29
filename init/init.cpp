@@ -24,6 +24,6 @@ auto Value::variables = std::map<Value::VariableName, std::shared_ptr<Value>>();
 const std::shared_ptr<Value> Value::NOVALUE = std::make_shared<Value>(Value(Type::Type::NOTYPE, true, false));
 
 auto Function::builtInFunctionMultiMap = Function::built_in_function_multi_map_init();
-auto Function::userDefinedFunctionMultiMap = std::multimap<Function::Signature, std::shared_ptr<SyntaxTree>>();
+auto Function::userDefinedFunctionMultiMap = Function::user_defined_function_multi_map_init();
 
 } // namespace CINT

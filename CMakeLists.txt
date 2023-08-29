@@ -22,5 +22,6 @@ add_subdirectory(syntax_tree)
 add_subdirectory(function)
 add_subdirectory(init)
 
+target_link_libraries(CINT PARSER)
 target_link_libraries(CINT UTILS SYNTAX_TREE INIT)
 target_link_libraries(CINT VALUE FUNCTION)

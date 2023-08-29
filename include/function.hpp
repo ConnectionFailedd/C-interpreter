@@ -43,22 +43,31 @@ std::multimap<Signature, std::shared_ptr<SyntaxTree>> user_defined_function_mult
 
 namespace BuiltInFunctions {
 
-template<class T>
+template<class _T>
 BuiltInFunction increment;
 
-template<class T>
+template<class _T>
 BuiltInFunction decrement;
 
 template<class _Tt, class _Ts>
 BuiltInFunction cast;
 
-template<class T>
+template<class _T>
 BuiltInFunction minus;
 
-template<class T>
+template<class _T>
+BuiltInFunction logic_not;
+
+template<class _T>
+BuiltInFunction bitwise_not;
+
+template<class _T>
+BuiltInFunction dereference;
+
+template<class _T>
 BuiltInFunction assign;
 
-template<class T>
+template<class _T>
 BuiltInFunction add;
 
 }

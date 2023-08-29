@@ -29,39 +29,21 @@ class Driver;
 }
 %define api.token.prefix {TOK_}
 %token
-  ASSIGN  ":="
-  MINUS   "-"
   PLUS    "+"
-  STAR    "*"
-  SLASH   "/"
-  LPAREN  "("
-  RPAREN  ")"
 ;
-%token <std::string> IDENTIFIER "identifier"
+
 %token <int> NUMBER "number"
-%nterm <int> exp
-%printer { yyo << $$; } <*>;
+%nterm <int> expression;
+
 %%
-%start unit;
-unit: assignments exp  { _driver.result = $2; };
+%start result;
+result:
+  expression { std::cout << $1 << std::endl;};
 
-assignments:
-  %empty                 {}
-| assignments assignment {};
+expression:
+  NUMBER {$$ = $1;}
+| NUMBER PLUS NUMBER {$$ = $1 + $3;};
 
-assignment:
-  "identifier" ":=" exp { _driver.variables[$1] = $3; };
-
-%left "+" "-";
-%left "*" "/";
-exp:
-  "number"
-| "identifier"  { $$ = _driver.variables[$1]; }
-| exp "+" exp   { $$ = $1 + $3; }
-| exp "-" exp   { $$ = $1 - $3; }
-| exp "*" exp   { $$ = $1 * $3; }
-| exp "/" exp   { $$ = $1 / $3; }
-| "(" exp ")"   { $$ = $2; }
 %%
 void
 CINT::PreProcess::Parser::error (const location_type& l, const std::string& m)
