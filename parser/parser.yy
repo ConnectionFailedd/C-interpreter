@@ -45,11 +45,11 @@ class Driver;
 %%
 %start result;
 result:
-  expression { auto value = $1->evaluate(); CINT::SyntaxTree::functionStack.push({}, value); std::cout << CINT::SyntaxTree::functionStack.get_return_value()->get_value<int>() << std::endl;};
+  expression { std::cout << $1->evaluate()->get_value<int>() << std::endl;};
 
 expression:
   INTEGER { $$ = $1; }
-| expression PLUS INTEGER { $$ = CINT::SyntaxTree::make_built_in_function_node(CINT::Function::builtInFunctionMultiMap.find(CINT::Function::Signature(CINT::Name("+")))->second, {$1, $3}); };
+| expression PLUS INTEGER { $$ = CINT::SyntaxTree::make_function_node(CINT::Function::functionMultiSet.find("+"), {$1, $3}); };
 
 %%
 void

@@ -1,29 +1,25 @@
 #include <memory>
 #include <vector>
 
+#include "function.hpp"
 #include "syntax_tree.hpp"
 #include "type.hpp"
 #include "value.hpp"
 
 namespace CINT {
 
-std::shared_ptr<Value> SyntaxTree::BuiltInFunctionNode::evaluate() {
-    auto arguments = std::vector<std::shared_ptr<Value>>();
+std::shared_ptr<Value> SyntaxTree::FunctionNode::evaluate() {
+    Function::functionStack.push();
     for(auto argument : __arguments) {
-        arguments.push_back(argument->evaluate());
-    }
-    return __builtInFunction(arguments);
-}
-
-std::shared_ptr<Value> SyntaxTree::UserDefinedFunctionNode::evaluate() {
-    auto arguments = std::vector<std::shared_ptr<Value>>();
-    for(auto argument : __arguments) {
-        arguments.push_back(argument->evaluate());
+        Function::functionStack.arguments().push_back(argument->evaluate());
     }
 
-    functionStack.push(arguments, CINT::Value::NOVALUE);
-    __userDefinedFunction->evaluate();
-    return functionStack.get_return_value();
+    __function->execute();
+
+    auto res = Function::functionStack.return_value();
+    Function::functionStack.pop();
+
+    return res;
 }
 
 std::shared_ptr<Value> SyntaxTree::IfNode::evaluate() {

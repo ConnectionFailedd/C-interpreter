@@ -23,7 +23,7 @@ public:
 
     // bool match(const Scope & _currentScope, const Scope & _specifiedScope, const std::vector<Scope> & _usingScope, const std::string & _baseName);
 
-    inline bool operator<(const Name & _rhs) const & { return __baseName < _rhs.__baseName; }
+    inline bool operator<(const Name & _rhs) const & noexcept { return __baseName < _rhs.__baseName; }
 
 public:
     const static Name NONAME;

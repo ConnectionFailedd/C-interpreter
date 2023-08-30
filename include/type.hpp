@@ -40,14 +40,14 @@ public:
     inline virtual bool is_array_type() const noexcept { return false; }
     inline virtual bool is_type_alias() const noexcept { return false; }
 
-    inline virtual bool operator<(const Type & _rhs) const & { return name() < _rhs.name(); }
+    inline virtual bool operator<(const Type & _rhs) const & noexcept { return name() < _rhs.name(); }
 
 public:
     class TypeMultiSet {
     public:
         class SharedPtrTypeCmp {
         public:
-            bool operator()(const std::shared_ptr<Type> & _lhs, const std::shared_ptr<Type> & _rhs) const & {
+            bool operator()(const std::shared_ptr<Type> & _lhs, const std::shared_ptr<Type> & _rhs) const & noexcept {
                 return *_lhs < *_rhs;
             }
         };
@@ -60,15 +60,14 @@ public:
 
         static TypeMultiSet init();
 
-        inline std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp>::iterator insert(const std::shared_ptr<Type> & _src) { return __typeMultiSet.insert(_src); }
-        inline std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp>::iterator insert(std::shared_ptr<Type> && _src) { return __typeMultiSet.insert(_src); }
+        inline void insert(const std::shared_ptr<Type> & _src) { __typeMultiSet.insert(_src); }
+        inline void insert(std::shared_ptr<Type> && _src) { __typeMultiSet.insert(_src); }
         inline std::shared_ptr<Type> find(std::string && _typeName) {
             // should be rewritten
             auto iter = __typeMultiSet.find(std::make_shared<Type>(TypeName(std::move(_typeName))));
             if(iter != __typeMultiSet.end()) {
                 return * iter;
             }
-            __typeMultiSet.equal_range(std::make_shared<Type>(TypeName(std::move(_typeName))));
             return Type::NOTYPE;
         }
     };

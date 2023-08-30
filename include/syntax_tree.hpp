@@ -7,6 +7,7 @@
 #include <stack>
 #include <vector>
 
+#include "function.hpp"
 #include "value.hpp"
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -39,29 +40,17 @@ public:
     public:
         inline ArgumentNode(std::size_t _index) : __index(_index) {}
 
-        inline virtual std::shared_ptr<Value> evaluate() override final { return functionStack.get_arguments()[__index]; }
+        inline virtual std::shared_ptr<Value> evaluate() override final { return Function::functionStack.arguments()[__index]; }
     };
 
-    class BuiltInFunctionNode : public Node {
+    class FunctionNode : public Node {
     private:
-        std::function<std::shared_ptr<Value>(const std::vector<std::shared_ptr<Value>> &)> __builtInFunction;
+        std::shared_ptr<Function> __function;
 
         std::vector<std::shared_ptr<Node>> __arguments;
 
     public:
-        inline BuiltInFunctionNode(const std::function<std::shared_ptr<Value>(const std::vector<std::shared_ptr<Value>> &)> & _builtInFunction, const std::vector<std::shared_ptr<Node>> & _arguments) : __builtInFunction(_builtInFunction), __arguments(_arguments) {}
-
-        virtual std::shared_ptr<Value> evaluate() override final;
-    };
-
-    class UserDefinedFunctionNode : public Node {
-    private:
-        std::shared_ptr<SyntaxTree> __userDefinedFunction;
-
-        std::vector<std::shared_ptr<Node>> __arguments;
-
-    public:
-        inline UserDefinedFunctionNode(const std::shared_ptr<SyntaxTree> & _userDefinedFunction, const std::vector<std::shared_ptr<Node>> & _arguments) : __userDefinedFunction(_userDefinedFunction), __arguments(_arguments) {}
+        inline FunctionNode(const std::shared_ptr<Function> & _function, const std::vector<std::shared_ptr<Node>> _arguments) : __function(_function), __arguments(_arguments) {}
 
         virtual std::shared_ptr<Value> evaluate() override final;
     };
@@ -128,7 +117,7 @@ public:
 
         virtual std::shared_ptr<Value> evaluate() override final {
             returnSignal = true;
-            functionStack.get_return_value() = __returnValue->evaluate();
+            Function::functionStack.return_value() = __returnValue->evaluate();
             return __returnValue->evaluate();
         }
     };
@@ -157,11 +146,8 @@ public:
     inline static std::shared_ptr<Node> make_argument_node(std::size_t _index) {
         return std::make_shared<ArgumentNode>(ArgumentNode(_index));
     }
-    inline static std::shared_ptr<Node> make_built_in_function_node(const std::function<std::shared_ptr<Value>(const std::vector<std::shared_ptr<Value>> &)> & _builtInFunction, const std::vector<std::shared_ptr<Node>> & _arguments) {
-        return std::make_shared<BuiltInFunctionNode>(BuiltInFunctionNode(_builtInFunction, _arguments));
-    }
-    inline static std::shared_ptr<Node> make_user_defined_function_node(const std::shared_ptr<SyntaxTree> & _userDefinedFunction, const std::vector<std::shared_ptr<Node>> & _arguments) {
-        return std::make_shared<UserDefinedFunctionNode>(UserDefinedFunctionNode(_userDefinedFunction, _arguments));
+    inline static std::shared_ptr<Node> make_function_node(const std::shared_ptr<Function> & _function, const std::vector<std::shared_ptr<Node>> _arguments) {
+        return std::make_shared<FunctionNode>(FunctionNode(_function, _arguments));
     }
     inline static std::shared_ptr<Node> make_if_node(const std::shared_ptr<Node> & _condition, const std::shared_ptr<Node> & _trueBranch, const std::shared_ptr<Node> & _falseBranch) {
         return std::make_shared<IfNode>(IfNode(_condition, _trueBranch, _falseBranch));
@@ -188,35 +174,6 @@ public:
     /* ---------------------------------------------------------------------------------------------------- */
 
 public:
-    class FunctionStack {
-    private:
-        class Element {
-        private:
-            std::vector<std::shared_ptr<Value>> __arguments;
-            std::shared_ptr<Value> __returnValue;
-
-        public:
-            inline Element(const std::vector<std::shared_ptr<Value>> & _arguments, const std::shared_ptr<Value> & _returnValue) : __arguments(_arguments), __returnValue(_returnValue) {}
-
-            inline const std::vector<std::shared_ptr<Value>> & get_arguments() { return __arguments; }
-            inline std::shared_ptr<Value> & get_return_value() { return __returnValue; }
-        };
-
-        std::stack<Element> __functionStack;
-
-    public:
-        inline FunctionStack() : __functionStack() {}
-
-        inline const std::vector<std::shared_ptr<Value>> & get_arguments() { return __functionStack.top().get_arguments(); }
-        inline std::shared_ptr<Value> & get_return_value() { return __functionStack.top().get_return_value(); }
-
-        inline void push(const std::vector<std::shared_ptr<Value>> & _arguments, const std::shared_ptr<Value> & _returnValue) { return __functionStack.push(Element(_arguments, _returnValue)); }
-        inline void pop() { return __functionStack.pop(); }
-    };
-
-public:
-    inline static auto functionStack = FunctionStack();
-
     inline static bool continueSignal = false;
     inline static bool breakSignal = false;
     inline static bool returnSignal = false;
