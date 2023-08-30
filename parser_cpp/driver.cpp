@@ -1,12 +1,27 @@
 #include "driver.hpp"
 #include "parser.hpp"
 
+// defined in lexer.cpp
+extern int yy_flex_debug;
+extern FILE * yyin;
+
 namespace CINT {
 namespace PreProcess {
 
-Driver::Driver() : trace_parsing(false), trace_scanning(false) {
-    variables["one"] = 1;
-    variables["two"] = 2;
+Driver::Driver() : trace_parsing(false), trace_scanning(false) {}
+
+void Driver::scan_begin() {
+    yy_flex_debug = trace_scanning;
+    if(file.empty() || file == "-")
+        yyin = stdin;
+    else if(!(yyin = fopen(file.c_str(), "r"))) {
+        std::cerr << "cannot open " << file << ": " << strerror(errno) << '\n';
+        exit(EXIT_FAILURE);
+    }
+}
+
+void Driver::scan_end() {
+    fclose(yyin);
 }
 
 int Driver::parse(const std::string & f) {
@@ -21,4 +36,4 @@ int Driver::parse(const std::string & f) {
 }
 
 }
-}
+} // namespace CINT::PreProcess

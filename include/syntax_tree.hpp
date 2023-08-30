@@ -55,7 +55,7 @@ private:
 
     /* ---------------------------------------------------------------------------------------------------- */
 
-private:
+public:
     class Node {
     public:
         virtual std::shared_ptr<Value> evaluate() = 0;

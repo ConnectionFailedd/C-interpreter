@@ -36,5 +36,6 @@ int main(int argc, char * argv[]) {
     // return 0;
     CINT::PreProcess::Driver driver;
     driver.parse("test.txt");
+    std::cout << driver.location << std::endl;
     return 0;
 }
