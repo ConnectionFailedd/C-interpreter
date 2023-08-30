@@ -12,7 +12,7 @@
 /* ---------------------------------------------------------------------------------------------------- */
 
 namespace CINT {
-namespace Type {
+namespace Types {
 
 /* ---------------------------------------------------------------------------------------------------- */
 
@@ -20,15 +20,17 @@ class Type {
 public:
     using TypeName = Name;
 
-public:
-    const static std::shared_ptr<Type> NOTYPE;
+private:
+    const TypeName __name;
 
 public:
-    inline Type() {}
+    inline Type() : __name(Name::NONAME) {}
+    inline Type(const TypeName & _name) : __name(_name) {}
+    inline Type(TypeName && _name) : __name(std::move(_name)) {}
 
-    inline virtual std::size_t size() const noexcept = 0;
-    inline virtual std::align_val_t align() const noexcept = 0;
-    inline virtual const TypeName & name() const noexcept = 0;
+    inline virtual std::size_t size() const noexcept { return 0; }
+    inline virtual std::align_val_t align() const noexcept { return std::align_val_t(1); }
+    inline virtual const TypeName & name() const noexcept { return __name; }
 
     inline virtual bool is_builtin_type() const noexcept { return false; }
     inline virtual bool is_aggregated_type() const noexcept { return false; }
@@ -38,20 +40,43 @@ public:
     inline virtual bool is_array_type() const noexcept { return false; }
     inline virtual bool is_type_alias() const noexcept { return false; }
 
-    bool operator<(const Type & _rhs) const & { return name() < _rhs.name(); }
+    inline virtual bool operator<(const Type & _rhs) const & { return name() < _rhs.name(); }
 
-private:
-    class SharedPtrTypeCmp {
+public:
+    class TypeMultiSet {
     public:
-        bool operator()(const std::shared_ptr<Type> & _lhs, const std::shared_ptr<Type> & _rhs) const & {
-            return *_lhs < *_rhs;
+        class SharedPtrTypeCmp {
+        public:
+            bool operator()(const std::shared_ptr<Type> & _lhs, const std::shared_ptr<Type> & _rhs) const & {
+                return *_lhs < *_rhs;
+            }
+        };
+
+    private:
+        std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp> __typeMultiSet;
+
+    public:
+        inline TypeMultiSet(std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp> && _typeMultiSet) : __typeMultiSet(std::move(_typeMultiSet)) {}
+
+        static TypeMultiSet init();
+
+        inline std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp>::iterator insert(const std::shared_ptr<Type> & _src) { return __typeMultiSet.insert(_src); }
+        inline std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp>::iterator insert(std::shared_ptr<Type> && _src) { return __typeMultiSet.insert(_src); }
+        inline std::shared_ptr<Type> find(std::string && _typeName) {
+            // should be rewritten
+            auto iter = __typeMultiSet.find(std::make_shared<Type>(TypeName(std::move(_typeName))));
+            if(iter != __typeMultiSet.end()) {
+                return * iter;
+            }
+            __typeMultiSet.equal_range(std::make_shared<Type>(TypeName(std::move(_typeName))));
+            return Type::NOTYPE;
         }
     };
 
-    static std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp> type_multi_set_init();
-
 public:
-    static std::multiset<std::shared_ptr<Type>, SharedPtrTypeCmp> typeMultiSet;
+    static TypeMultiSet typeMultiSet;
+
+    const static std::shared_ptr<Type> NOTYPE;
 };
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -61,17 +86,17 @@ private:
     const std::size_t __size;
     const std::align_val_t __align;
 
-    const TypeName __name;
-
 public:
-    inline BuiltInType(std::size_t _size, std::align_val_t _align, const TypeName & _name) : __size(_size), __align(_align), __name(_name) {}
-    inline BuiltInType(std::size_t _size, std::align_val_t _align, TypeName && _name) noexcept : __size(_size), __align(_align), __name(std::move(_name)) {}
+    inline BuiltInType(const TypeName & _name, std::size_t _size, std::align_val_t _align) : Type(_name), __size(_size), __align(_align) {}
+    inline BuiltInType(TypeName && _name, std::size_t _size, std::align_val_t _align) noexcept : Type(std::move(_name)), __size(_size), __align(_align) {}
 
     inline virtual std::size_t size() const noexcept override final { return __size; }
     inline virtual std::align_val_t align() const noexcept override final { return __align; }
-    inline virtual const TypeName & name() const noexcept override final { return __name; }
+    using Type::name;
 
     inline virtual bool is_builtin_type() const noexcept override final { return true; }
+
+    using Type::operator<;
 };
 
 class AggregatedType : public Type {
@@ -82,16 +107,16 @@ private:
     const std::vector<std::shared_ptr<Type>> __subTypes;
     const std::shared_ptr<Type> __fatherType;
 
-    const TypeName __name;
-
 public:
-    AggregatedType(std::vector<std::shared_ptr<Type>> && _subTypes, TypeName && _name, const std::shared_ptr<Type> & __fatherType = nullptr) noexcept;
+    AggregatedType(TypeName && _name, std::vector<std::shared_ptr<Type>> && _subTypes, const std::shared_ptr<Type> & __fatherType = nullptr) noexcept;
 
     inline virtual std::size_t size() const noexcept override final { return __size; }
     inline virtual std::align_val_t align() const noexcept override final { return __align; }
-    inline virtual const TypeName & name() const noexcept override final { return __name; }
+    using Type::name;
 
     inline virtual bool is_aggregated_type() const noexcept override final { return true; }
+
+    using Type::operator<;
 };
 
 class PointerType : public Type {
@@ -100,13 +125,15 @@ private:
     const std::shared_ptr<Type> __trueType;
 
 public:
-    inline PointerType(const std::shared_ptr<Type> & _baseType, const std::shared_ptr<Type> _trueType) noexcept : __baseType(_baseType), __trueType(_trueType) {}
+    inline PointerType(const std::shared_ptr<Type> & _baseType, const std::shared_ptr<Type> _trueType) noexcept : Type(), __baseType(_baseType), __trueType(_trueType) {}
 
     inline virtual std::size_t size() const noexcept override final { return sizeof(void *); }
     inline virtual std::align_val_t align() const noexcept override final { return std::align_val_t(alignof(void *)); }
-    inline virtual const TypeName & name() const noexcept override final { return Name::NONAME; }
+    using Type::name;
 
     inline virtual bool is_pointer_type() const noexcept override final { return true; }
+
+    using Type::operator<;
 };
 
 class LeftReferenceType : public Type {
@@ -115,13 +142,15 @@ private:
     const std::shared_ptr<Type> __trueType;
 
 public:
-    inline LeftReferenceType(const std::shared_ptr<Type> & _baseType, const std::shared_ptr<Type> _trueType) noexcept : __baseType(_baseType), __trueType(_trueType) {}
+    inline LeftReferenceType(const std::shared_ptr<Type> & _baseType, const std::shared_ptr<Type> _trueType) noexcept : Type(), __baseType(_baseType), __trueType(_trueType) {}
 
     inline virtual std::size_t size() const noexcept override final { return sizeof(void *); }
     inline virtual std::align_val_t align() const noexcept override final { return std::align_val_t(alignof(void *)); }
-    inline virtual const TypeName & name() const noexcept override final { return Name::NONAME; }
+    using Type::name;
 
     inline virtual bool is_left_reference_type() const noexcept override final { return true; }
+
+    using Type::operator<;
 };
 
 class RightReferenceType : public Type {
@@ -130,13 +159,15 @@ private:
     const std::shared_ptr<Type> __trueType;
 
 public:
-    inline RightReferenceType(const std::shared_ptr<Type> & _baseType, const std::shared_ptr<Type> _trueType) noexcept : __baseType(_baseType), __trueType(_trueType) {}
+    inline RightReferenceType(const std::shared_ptr<Type> & _baseType, const std::shared_ptr<Type> _trueType) noexcept : Type(), __baseType(_baseType), __trueType(_trueType) {}
 
     inline virtual std::size_t size() const noexcept override final { return sizeof(void *); }
     inline virtual std::align_val_t align() const noexcept override final { return std::align_val_t(alignof(void *)); }
-    inline virtual const TypeName & name() const noexcept override final { return Name::NONAME; }
+    using Type::name;
 
     inline virtual bool is_right_reference_type() const noexcept override final { return true; }
+
+    using Type::operator<;
 };
 
 class ArrayType : public Type {
@@ -145,29 +176,31 @@ private:
     const std::size_t __arraySize;
 
 public:
-    inline ArrayType(const std::shared_ptr<Type> & _baseType, std::size_t _arraySize) noexcept : __baseType(_baseType), __arraySize(_arraySize) {}
+    inline ArrayType(const std::shared_ptr<Type> & _baseType, std::size_t _arraySize) noexcept : Type(), __baseType(_baseType), __arraySize(_arraySize) {}
 
     inline virtual std::size_t size() const noexcept override final { return __baseType->size() * __arraySize; }
     inline virtual std::align_val_t align() const noexcept override final { return __baseType->align(); }
-    inline virtual const TypeName & name() const noexcept override final { return Name::NONAME; }
+    using Type::name;
 
     inline virtual bool is_array_type() const noexcept override final { return true; }
+
+    using Type::operator<;
 };
 
 class TypeAlias : public Type {
 private:
     const std::shared_ptr<Type> __originalType;
 
-    const TypeName __name;
-
 public:
-    inline TypeAlias(const std::shared_ptr<Type> _originalType, TypeName && _name) noexcept : __originalType(_originalType), __name(std::move(_name)) {}
+    inline TypeAlias(TypeName && _name, const std::shared_ptr<Type> _originalType) noexcept : Type(std::move(_name)), __originalType(_originalType) {}
 
     inline virtual std::size_t size() const noexcept override final { return __originalType->size(); }
     inline virtual std::align_val_t align() const noexcept override final { return __originalType->align(); }
-    inline virtual const TypeName & name() const noexcept override final { return __name; }
+    using Type::name;
 
     inline virtual bool is_type_alias() const noexcept override final { return true; }
+
+    using Type::operator<;
 };
 
 /* ---------------------------------------------------------------------------------------------------- */

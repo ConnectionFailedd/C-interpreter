@@ -44,7 +44,7 @@
 namespace CINT::PreProcess {
 
 CINT::PreProcess::Parser::symbol_type make_INTEGER(const char * _str, const CINT::PreProcess::Parser::location_type& location) {
-    auto int_type = *CINT::Type::Type::typeMultiSet.find(std::make_shared<CINT::Type::BuiltInType>(0, std::align_val_t(0), CINT::Name("int")));
+    auto int_type = CINT::Types::Type::typeMultiSet.find("int");
     auto value = std::make_shared<CINT::Value>(int_type, false, false);
     value->set_value<int>(std::stol(_str));
     auto fixedValueNode = CINT::SyntaxTree::make_fixed_value_node(value);

@@ -15,13 +15,13 @@ namespace CINT {
 auto Scope::currentScope = Scope();
 auto Scope::scopeStack = std::stack<Scope>();
 
-const auto Name::NONAME = Name(Scope(), "");
+const auto Name::NONAME = Name("");
 
-const std::shared_ptr<Type::Type> Type::Type::NOTYPE = std::make_shared<BuiltInType>(BuiltInType(0, std::align_val_t(alignof(std::max_align_t)), Name::NONAME));
-auto Type::Type::typeMultiSet = Type::type_multi_set_init();
+const std::shared_ptr<Types::Type> Types::Type::NOTYPE = std::make_shared<Type>();
+auto Types::Type::typeMultiSet = Type::TypeMultiSet::init();
 
-auto Value::variables = std::map<Value::VariableName, std::shared_ptr<Value>>();
-const std::shared_ptr<Value> Value::NOVALUE = std::make_shared<Value>(Value(Type::Type::NOTYPE, true, false));
+auto Value::variables = Value::VariableMultiMap();
+const std::shared_ptr<Value> Value::NOVALUE = std::make_shared<Value>(Value(Types::Type::NOTYPE, true, false));
 
 auto Function::builtInFunctionMultiMap = Function::built_in_function_multi_map_init();
 auto Function::userDefinedFunctionMultiMap = Function::user_defined_function_multi_map_init();

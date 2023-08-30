@@ -16,45 +16,6 @@ namespace CINT {
 /* ---------------------------------------------------------------------------------------------------- */
 
 class SyntaxTree {
-    /* ---------------------------------------------------------------------------------------------------- */
-
-private:
-    class FunctionStack {
-    private:
-        class Element {
-        private:
-            std::vector<std::shared_ptr<Value>> __arguments;
-            std::shared_ptr<Value> __returnValue;
-
-        public:
-            inline Element(const std::vector<std::shared_ptr<Value>> & _arguments, const std::shared_ptr<Value> & _returnValue) : __arguments(_arguments), __returnValue(_returnValue) {}
-
-            inline const std::vector<std::shared_ptr<Value>> & get_arguments() { return __arguments; }
-            inline std::shared_ptr<Value> & get_return_value() { return __returnValue; }
-        };
-
-        std::stack<Element> __functionStack;
-
-    public:
-        inline FunctionStack() : __functionStack() {}
-
-        inline const std::vector<std::shared_ptr<Value>> & get_arguments() { return __functionStack.top().get_arguments(); }
-        inline std::shared_ptr<Value> & get_return_value() { return __functionStack.top().get_return_value(); }
-
-        inline void push(const std::vector<std::shared_ptr<Value>> & _arguments, const std::shared_ptr<Value> & _returnValue) { return __functionStack.push(Element(_arguments, _returnValue)); }
-        inline void pop() { return __functionStack.pop(); }
-    };
-
-public:
-    inline static auto functionStack = FunctionStack();
-
-private:
-    inline static bool continueSignal = false;
-    inline static bool breakSignal = false;
-    inline static bool returnSignal = false;
-
-    /* ---------------------------------------------------------------------------------------------------- */
-
 public:
     class Node {
     public:
@@ -223,6 +184,42 @@ public:
     inline static std::shared_ptr<Node> make_semicolon_node(const std::shared_ptr<Node> & _previousExpression, const std::shared_ptr<Node> & _nextSemicolon) {
         return std::make_shared<SemicolonNode>(SemicolonNode(_previousExpression, _nextSemicolon));
     }
+
+    /* ---------------------------------------------------------------------------------------------------- */
+
+public:
+    class FunctionStack {
+    private:
+        class Element {
+        private:
+            std::vector<std::shared_ptr<Value>> __arguments;
+            std::shared_ptr<Value> __returnValue;
+
+        public:
+            inline Element(const std::vector<std::shared_ptr<Value>> & _arguments, const std::shared_ptr<Value> & _returnValue) : __arguments(_arguments), __returnValue(_returnValue) {}
+
+            inline const std::vector<std::shared_ptr<Value>> & get_arguments() { return __arguments; }
+            inline std::shared_ptr<Value> & get_return_value() { return __returnValue; }
+        };
+
+        std::stack<Element> __functionStack;
+
+    public:
+        inline FunctionStack() : __functionStack() {}
+
+        inline const std::vector<std::shared_ptr<Value>> & get_arguments() { return __functionStack.top().get_arguments(); }
+        inline std::shared_ptr<Value> & get_return_value() { return __functionStack.top().get_return_value(); }
+
+        inline void push(const std::vector<std::shared_ptr<Value>> & _arguments, const std::shared_ptr<Value> & _returnValue) { return __functionStack.push(Element(_arguments, _returnValue)); }
+        inline void pop() { return __functionStack.pop(); }
+    };
+
+public:
+    inline static auto functionStack = FunctionStack();
+
+    inline static bool continueSignal = false;
+    inline static bool breakSignal = false;
+    inline static bool returnSignal = false;
 };
 
 /* ---------------------------------------------------------------------------------------------------- */

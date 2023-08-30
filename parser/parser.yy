@@ -9,7 +9,7 @@
 %define api.value.type variant
 %define parse.assert
 %code requires {
-# include <string>
+#include <string>
 #include "function.hpp"
 #include "value.hpp"
 #include "syntax_tree.hpp"
@@ -25,6 +25,9 @@ class Driver;
 %param { CINT::PreProcess::Driver & _driver }
 
 %locations
+%define api.location.file "../include/location.hpp"
+%define api.location.include {"location.hpp"}
+
 %define parse.trace
 %define parse.error detailed
 %define parse.lac full

@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "function.hpp"
+#include "type.hpp"
 #include "value.hpp"
 
 namespace CINT::Function {
@@ -10,10 +11,7 @@ namespace CINT::Function {
 std::multimap<Signature, std::function<BuiltInFunction>> built_in_function_multi_map_init() {
     auto res = std::multimap<Signature, std::function<BuiltInFunction>>();
 
-    auto int_type = std::shared_ptr<CINT::Type::Type>();
-    if(CINT::Type::Type::typeMultiSet.find(std::make_shared<CINT::Type::BuiltInType>(0, std::align_val_t(0), CINT::Name("int"))) != CINT::Type::Type::typeMultiSet.end()) {
-        int_type = *CINT::Type::Type::typeMultiSet.find(std::make_shared<CINT::Type::BuiltInType>(0, std::align_val_t(0), CINT::Name("int")));
-    }
+    auto int_type = Types::Type::typeMultiSet.find("int");
     auto intAddIntIntSignature = Signature(Name("+"), int_type, std::vector({int_type, int_type}));
     auto intAddIntIntFunction = std::function(BuiltInFunctions::add<int>);
     res.insert({intAddIntIntSignature, intAddIntIntFunction});
@@ -55,7 +53,7 @@ std::shared_ptr<Value> add(const std::vector<std::shared_ptr<Value>> & _argument
     auto lhs = _arguments[0]->get_value<_T>();
     auto rhs = _arguments[1]->get_value<_T>();
     auto res = lhs + rhs;
-    auto returnValue = std::make_shared<Value>(Value(_arguments[0]->get_type(), false, false));
+    auto returnValue = std::make_shared<Value>(Value(_arguments[0]->type(), false, false));
     returnValue->set_value<_T>(res);
     return returnValue;
 }

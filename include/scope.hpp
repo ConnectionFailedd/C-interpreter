@@ -16,15 +16,16 @@ private:
     std::vector<std::string> __scopeNames;
 
 public:
-    static Scope currentScope;
-    static std::stack<Scope> scopeStack;
-
-public:
     inline Scope() noexcept : __scopeNames() {}
     inline Scope(const Scope & _src) : __scopeNames(_src.__scopeNames) {}
+    inline Scope(Scope && _src) noexcept : __scopeNames(std::move(_src.__scopeNames)) {}
 
     inline void enter(std::string _newScopeName) { __scopeNames.push_back(_newScopeName); }
     inline void exit() { __scopeNames.pop_back(); }
+
+public:
+    static Scope currentScope;
+    static std::stack<Scope> scopeStack;
 };
 
 /* ---------------------------------------------------------------------------------------------------- */

@@ -14,8 +14,9 @@ namespace CINT {
 /* ---------------------------------------------------------------------------------------------------- */
 
 class Value {
+    friend class SubValue;
 private:
-    const std::shared_ptr<Type::Type> __type;
+    const std::shared_ptr<Types::Type> __type;
 
     void * __valuePointer;
 
@@ -23,13 +24,7 @@ private:
     const bool __isLeft;
 
 public:
-    using VariableName = Name;
-    static std::map<VariableName, std::shared_ptr<Value>> variables;
-
-    const static std::shared_ptr<Value> NOVALUE;
-
-public:
-    inline Value(const std::shared_ptr<Type::Type> & _type, bool _isConst, bool _isLeft) : __type(_type), __valuePointer(::operator new(_type->size(), _type->align())), __isConst(_isConst), __isLeft(_isLeft) {}
+    inline Value(const std::shared_ptr<Types::Type> & _type, bool _isConst, bool _isLeft) : __type(_type), __valuePointer(::operator new(_type->size(), _type->align())), __isConst(_isConst), __isLeft(_isLeft) {}
     inline Value(Value && _src) noexcept : __type(_src.__type), __isConst(_src.__isConst), __isLeft(_src.__isLeft) {
         __valuePointer = _src.__valuePointer;
         _src.__valuePointer = nullptr;
@@ -41,7 +36,9 @@ public:
         }
     }
 
-    inline const std::shared_ptr<Type::Type> & get_type() { return __type; }
+    inline const std::shared_ptr<Types::Type> & type() const noexcept { return __type; }
+    inline bool is_const() const noexcept { return __isConst; }
+    inline bool is_left() const noexcept { return __isLeft; }
 
     template<class T>
     inline T get_value() const {
@@ -57,13 +54,27 @@ public:
         return *(int *)(__valuePointer);
     }
 
-    inline void reset_value_pointer() { __valuePointer = nullptr; }
+public:
+    using VariableName = Name;
+
+    class VariableMultiMap {
+    private:
+        std::multimap<VariableName, std::shared_ptr<Value>> __variableMultiMap;
+
+    public:
+        inline VariableMultiMap() : __variableMultiMap() {}
+    };
+
+public:
+    static VariableMultiMap variables;
+
+    const static std::shared_ptr<Value> NOVALUE;
 };
 
 class SubValue : public Value {
 public:
     inline virtual ~SubValue() override {
-        reset_value_pointer();
+        __valuePointer = nullptr;
     }
 };
 

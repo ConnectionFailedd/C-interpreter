@@ -6,11 +6,11 @@
 
 namespace CINT {
 
-std::multiset<std::shared_ptr<Type::Type>, Type::Type::SharedPtrTypeCmp> Type::Type::type_multi_set_init() {
-    auto res = std::multiset<std::shared_ptr<Type>, Type::Type::SharedPtrTypeCmp>();
+Types::Type::TypeMultiSet Types::Type::TypeMultiSet::init() {
+    auto res = std::multiset<std::shared_ptr<Type>, Types::Type::TypeMultiSet::SharedPtrTypeCmp>();
 
-    res.insert(std::make_shared<BuiltInType>(1, std::align_val_t(1), Name(Scope(), "char")));
-    res.insert(std::make_shared<BuiltInType>(4, std::align_val_t(4), Name(Scope(), "int")));
+    res.insert(std::make_shared<BuiltInType>(Name(Scope(), "char"), 1, std::align_val_t(1)));
+    res.insert(std::make_shared<BuiltInType>(Name(Scope(), "int"), 4, std::align_val_t(4)));
 
     return res;
 }

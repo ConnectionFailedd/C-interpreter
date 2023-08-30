@@ -23,12 +23,12 @@ namespace Function {
 class Signature {
 private:
     Name __name;
-    std::shared_ptr<Type::Type> __returnType;
-    std::vector<std::shared_ptr<Type::Type>> __argumentTypes;
+    std::shared_ptr<Types::Type> __returnType;
+    std::vector<std::shared_ptr<Types::Type>> __argumentTypes;
 
 public:
     Signature(const Name & _name) : __name(_name), __returnType(), __argumentTypes() {}
-    Signature(const Name & _name, const std::shared_ptr<Type::Type> & _returnType, const std::vector<std::shared_ptr<Type::Type>> & _argumentTypes) : __name(_name), __returnType(_returnType), __argumentTypes(_argumentTypes) {}
+    Signature(const Name & _name, const std::shared_ptr<Types::Type> & _returnType, const std::vector<std::shared_ptr<Types::Type>> & _argumentTypes) : __name(_name), __returnType(_returnType), __argumentTypes(_argumentTypes) {}
 
     bool operator<(const Signature & _rhs) const & { return __name < _rhs.__name; }
 };
