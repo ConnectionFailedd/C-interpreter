@@ -16,12 +16,12 @@ namespace CINT {
 class Value {
     friend class SubValue;
 private:
-    const std::shared_ptr<Types::Type> __type;
+    std::shared_ptr<Types::Type> __type;
 
     void * __valuePointer;
 
-    const bool __isConst;
-    const bool __isLeft;
+    bool __isConst;
+    bool __isLeft;
 
 public:
     inline Value(const std::shared_ptr<Types::Type> & _type, bool _isConst, bool _isLeft) : __type(_type), __valuePointer(::operator new(_type->size(), _type->align())), __isConst(_isConst), __isLeft(_isLeft) {}
@@ -36,7 +36,7 @@ public:
         }
     }
 
-    inline const std::shared_ptr<Types::Type> & type() const noexcept { return __type; }
+    inline const std::shared_ptr<Types::Type> & type() const & noexcept { return __type; }
     inline bool is_const() const noexcept { return __isConst; }
     inline bool is_left() const noexcept { return __isLeft; }
 
@@ -49,25 +49,7 @@ public:
         *(T *)(__valuePointer) = _src;
     }
 
-    template<bool>
-    inline bool get_value() const {
-        return *(int *)(__valuePointer);
-    }
-
 public:
-    using VariableName = Name;
-
-    class VariableMultiMap {
-    private:
-        std::multimap<VariableName, std::shared_ptr<Value>> __variableMultiMap;
-
-    public:
-        inline VariableMultiMap() : __variableMultiMap() {}
-    };
-
-public:
-    static VariableMultiMap variables;
-
     const static std::shared_ptr<Value> NOVALUE;
 };
 

@@ -4,30 +4,33 @@
 #include <vector>
 
 #include "function.hpp"
+#include "name.hpp"
+#include "scope.hpp"
 #include "syntax_tree.hpp"
 #include "type.hpp"
 #include "value.hpp"
 
 namespace CINT {
 
-void UserDefinedFunction::execute() const { __functionBody->evaluate(); }
+std::shared_ptr<Value> UserDefinedFunction::execute() const { return __functionBody->evaluate(); }
 
 Function::FunctionMultiSet Function::FunctionMultiSet::init() {
     auto res = std::multiset<std::shared_ptr<Function>, SharedPtrFunctionCmp>();
 
-    auto int_type = Types::Type::typeMultiSet.find("int");
-    res.insert(std::make_shared<BuiltInFunction>(Signature(FunctionName("+"), int_type, {int_type, int_type}), BuiltInFunction::add<int>));
+    auto int_type = Types::Type::typeMultiSet.find(UnconfirmedName(Scope::NOSCOPE, Scope::currentScopeStack, {}, "int"));
+    res.insert(std::make_shared<BuiltInFunction>(Signature(FunctionName(Scope::GLOBAL_SCOPE, "+"), int_type, {int_type, int_type}), BuiltInFunction::add<int>));
 
     return res;
 }
 
 template<class _T>
-void BuiltInFunction::add() {
+std::shared_ptr<Value> BuiltInFunction::add() {
     auto lhs = functionStack.arguments()[0]->get_value<_T>();
     auto rhs = functionStack.arguments()[1]->get_value<_T>();
     auto res = lhs + rhs;
-    functionStack.return_value() = std::make_shared<Value>(Value(functionStack.arguments()[0]->type(), false, false));
-    functionStack.return_value()->set_value<_T>(res);
+    auto returnValue = std::make_shared<Value>(Value(functionStack.arguments()[0]->type(), false, false));
+    returnValue->set_value<_T>(res);
+    return returnValue;
 }
 }
 

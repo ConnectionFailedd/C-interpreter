@@ -44,10 +44,11 @@ private:
     Signature __functionSignature;
 
 public:
+    inline Function() : __functionSignature(Name::NONAME) {}
     inline Function(const Signature & _functionSignature) : __functionSignature(_functionSignature) {}
     inline Function(Signature && _functionSignature) : __functionSignature(std::move(_functionSignature)) {}
 
-    inline virtual void execute() const { functionStack.return_value() = Value::NOVALUE; }
+    inline virtual std::shared_ptr<Value> execute() const { return Value::NOVALUE; }
 
     inline virtual bool operator<(const Function & _rhs) const & noexcept { return __functionSignature < _rhs.__functionSignature; }
 
@@ -92,23 +93,28 @@ public:
         class Element {
         private:
             std::vector<std::shared_ptr<Value>> __arguments;
-            std::shared_ptr<Value> __returnValue;
 
         public:
-            inline Element(const std::vector<std::shared_ptr<Value>> & _arguments) : __arguments(_arguments), __returnValue(nullptr) {}
+            inline Element(const std::vector<std::shared_ptr<Value>> & _arguments) : __arguments(_arguments) {}
             inline Element(std::vector<std::shared_ptr<Value>> && _arguments) : __arguments(std::move(_arguments)) {}
 
             inline std::vector<std::shared_ptr<Value>> & arguments() { return __arguments; }
-            inline std::shared_ptr<Value> & return_value() { return __returnValue; }
         };
 
         std::stack<Element> __functionStack;
+
+        bool __breakSignal;
+        bool __continueSignal;
+        bool __returnSignal;
 
     public:
         inline FunctionStack() : __functionStack() {}
 
         inline std::vector<std::shared_ptr<Value>> & arguments() { return __functionStack.top().arguments(); }
-        inline std::shared_ptr<Value> & return_value() { return __functionStack.top().return_value(); }
+
+        inline bool & break_signal() { return __breakSignal; }
+        inline bool & continue_signal() { return __continueSignal; }
+        inline bool & return_signal() { return __returnSignal; }
 
         inline void push(const std::vector<std::shared_ptr<Value>> & _arguments = {}) { return __functionStack.push(Element(_arguments)); }
         inline void pop() { return __functionStack.pop(); }
@@ -127,7 +133,7 @@ public:
     inline UserDefinedFunction(const Signature & _functionSignature, const std::shared_ptr<SyntaxTree> & _functionBody) : Function(_functionSignature), __functionBody(_functionBody) {}
     inline UserDefinedFunction(Signature && _functionSignature, const std::shared_ptr<SyntaxTree> & _functionBody) : Function(std::move(_functionSignature)), __functionBody(_functionBody) {}
 
-    virtual void execute() const override final;
+    virtual std::shared_ptr<Value> execute() const override final;
 
     using Function::operator<;
 };
@@ -136,7 +142,7 @@ public:
 
 class BuiltInFunction : public Function {
 public:
-    using BuiltInFunctionType = void();
+    using BuiltInFunctionType = std::shared_ptr<Value>();
 
 private:
     std::shared_ptr<std::function<BuiltInFunctionType>> __functionBody;
@@ -145,7 +151,7 @@ public:
     inline BuiltInFunction(const Signature & _functionSignature, BuiltInFunctionType _functionBody) : Function(_functionSignature), __functionBody(std::make_shared<std::function<BuiltInFunctionType>>(_functionBody)) {}
     inline BuiltInFunction(Signature && _functionSignature, BuiltInFunctionType _functionBody) : Function(std::move(_functionSignature)), __functionBody(std::make_shared<std::function<BuiltInFunctionType>>(_functionBody)) {}
 
-    inline virtual void execute() const override final { __functionBody->operator()(); }
+    inline virtual std::shared_ptr<Value>execute() const override final { return __functionBody->operator()(); }
 
     using Function::operator<;
 

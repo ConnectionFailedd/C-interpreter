@@ -93,7 +93,7 @@ public:
         inline BreakNode() {}
 
         virtual std::shared_ptr<Value> evaluate() override final {
-            breakSignal = true;
+            Function::functionStack.break_signal() = true;
             return Value::NOVALUE;
         }
     };
@@ -103,7 +103,7 @@ public:
         inline ContinueNode() {}
 
         virtual std::shared_ptr<Value> evaluate() override final {
-            continueSignal = true;
+            Function::functionStack.continue_signal() = true;
             return Value::NOVALUE;
         }
     };
@@ -116,8 +116,7 @@ public:
         inline ReturnNode(const std::shared_ptr<Node> & _returnValue) : __returnValue(_returnValue) {}
 
         virtual std::shared_ptr<Value> evaluate() override final {
-            returnSignal = true;
-            Function::functionStack.return_value() = __returnValue->evaluate();
+            Function::functionStack.return_signal() = true;
             return __returnValue->evaluate();
         }
     };
@@ -171,12 +170,6 @@ public:
         return std::make_shared<SemicolonNode>(SemicolonNode(_previousExpression, _nextSemicolon));
     }
 
-    /* ---------------------------------------------------------------------------------------------------- */
-
-public:
-    inline static bool continueSignal = false;
-    inline static bool breakSignal = false;
-    inline static bool returnSignal = false;
 };
 
 /* ---------------------------------------------------------------------------------------------------- */

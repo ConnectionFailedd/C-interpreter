@@ -11,6 +11,10 @@
 #include <new>
 #include <vector>
 
+namespace a {
+int cout;
+}
+
 int main(int argc, char * argv[]) {
     // auto int_type = std::shared_ptr<CINT::Type::Type>();
     // if(CINT::Type::Type::typeMultiSet.find(std::make_shared<CINT::Type::BuiltInType>(0, std::align_val_t(0), CINT::Name("int"))) != CINT::Type::Type::typeMultiSet.end()) {

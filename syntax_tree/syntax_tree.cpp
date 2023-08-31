@@ -14,9 +14,7 @@ std::shared_ptr<Value> SyntaxTree::FunctionNode::evaluate() {
         Function::functionStack.arguments().push_back(argument->evaluate());
     }
 
-    __function->execute();
-
-    auto res = Function::functionStack.return_value();
+    auto res = __function->execute();
     Function::functionStack.pop();
 
     return res;
@@ -33,15 +31,15 @@ std::shared_ptr<Value> SyntaxTree::IfNode::evaluate() {
 std::shared_ptr<Value> SyntaxTree::WhileNode::evaluate() {
     while(__condition->evaluate()->get_value<bool>()) {
         auto res = __trueBranch->evaluate();
-        if(breakSignal) {
-            breakSignal = false;
+        if(Function::functionStack.break_signal()) {
+            Function::functionStack.break_signal() = false;
             break;
         }
-        if(continueSignal) {
-            continueSignal = false;
+        if(Function::functionStack.continue_signal()) {
+            Function::functionStack.continue_signal() = false;
             continue;
         }
-        if(returnSignal) {
+        if(Function::functionStack.return_signal()) {
             return res;
         }
     }
@@ -52,15 +50,15 @@ std::shared_ptr<Value> SyntaxTree::WhileNode::evaluate() {
 std::shared_ptr<Value> SyntaxTree::ForNode::evaluate() {
     for(__initialization->evaluate(); __condition->evaluate()->get_value<bool>(); __increment->evaluate()) {
         auto res = __trueBranch->evaluate();
-        if(breakSignal) {
-            breakSignal = false;
+        if(Function::functionStack.break_signal()) {
+            Function::functionStack.break_signal() = false;
             break;
         }
-        if(continueSignal) {
-            continueSignal = false;
+        if(Function::functionStack.continue_signal()) {
+            Function::functionStack.continue_signal() = false;
             continue;
         }
-        if(returnSignal) {
+        if(Function::functionStack.return_signal()) {
             return res;
         }
     }
@@ -70,7 +68,7 @@ std::shared_ptr<Value> SyntaxTree::ForNode::evaluate() {
 
 std::shared_ptr<Value> SyntaxTree::SemicolonNode::evaluate() {
     auto res = __previousExpression->evaluate();
-    if(breakSignal || continueSignal || returnSignal) {
+    if(Function::functionStack.break_signal() || Function::functionStack.continue_signal() || Function::functionStack.return_signal()) {
         return res;
     }
 
