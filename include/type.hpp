@@ -21,16 +21,16 @@ public:
     using TypeName = Name;
 
 private:
-    TypeName __name;
+    TypeName __typeName;
 
 public:
-    inline Type() : __name(Name::NONAME) {}
-    inline Type(const TypeName & _name) : __name(_name) {}
-    inline Type(TypeName && _name) : __name(std::move(_name)) {}
+    inline Type() : __typeName(Name::NONAME) {}
+    inline Type(const TypeName & _typeName) : __typeName(_typeName) {}
+    inline Type(TypeName && _typeName) : __typeName(std::move(_typeName)) {}
 
     inline virtual std::size_t size() const & noexcept { return 0; }
     inline virtual std::align_val_t align() const & noexcept { return std::align_val_t(1); }
-    inline virtual const TypeName & name() const & noexcept { return __name; }
+    inline virtual const TypeName & type_name() const & noexcept { return __typeName; }
 
     inline virtual bool is_builtin_type() const noexcept { return false; }
     inline virtual bool is_aggregated_type() const noexcept { return false; }
@@ -40,7 +40,7 @@ public:
     inline virtual bool is_array_type() const noexcept { return false; }
     inline virtual bool is_type_alias() const noexcept { return false; }
 
-    inline virtual bool operator<(const Type & _rhs) const & noexcept { return name() < _rhs.name(); }
+    inline virtual bool operator<(const Type & _rhs) const & noexcept { return type_name() < _rhs.type_name(); }
 
 public:
     class TypeMultiSet {
@@ -79,12 +79,12 @@ private:
     const std::align_val_t __align;
 
 public:
-    inline BuiltInType(const TypeName & _name, std::size_t _size, std::align_val_t _align) : Type(_name), __size(_size), __align(_align) {}
-    inline BuiltInType(TypeName && _name, std::size_t _size, std::align_val_t _align) noexcept : Type(std::move(_name)), __size(_size), __align(_align) {}
+    inline BuiltInType(const TypeName & _typeName, std::size_t _size, std::align_val_t _align) : Type(_typeName), __size(_size), __align(_align) {}
+    inline BuiltInType(TypeName && _typeName, std::size_t _size, std::align_val_t _align) noexcept : Type(std::move(_typeName)), __size(_size), __align(_align) {}
 
     inline virtual std::size_t size() const & noexcept override final { return __size; }
     inline virtual std::align_val_t align() const & noexcept override final { return __align; }
-    using Type::name;
+    using Type::type_name;
 
     inline virtual bool is_builtin_type() const noexcept override final { return true; }
 
@@ -100,11 +100,11 @@ private:
     std::shared_ptr<Type> __fatherType;
 
 public:
-    AggregatedType(TypeName && _name, std::vector<std::shared_ptr<Type>> && _subTypes, const std::shared_ptr<Type> & __fatherType = nullptr) noexcept;
+    AggregatedType(TypeName && _typeName, std::vector<std::shared_ptr<Type>> && _subTypes, const std::shared_ptr<Type> & __fatherType = nullptr) noexcept;
 
     inline virtual std::size_t size() const & noexcept override final { return __size; }
     inline virtual std::align_val_t align() const & noexcept override final { return __align; }
-    using Type::name;
+    using Type::type_name;
 
     inline virtual bool is_aggregated_type() const noexcept override final { return true; }
 
@@ -121,7 +121,7 @@ public:
 
     inline virtual std::size_t size() const & noexcept override final { return sizeof(void *); }
     inline virtual std::align_val_t align() const & noexcept override final { return std::align_val_t(alignof(void *)); }
-    using Type::name;
+    using Type::type_name;
 
     inline virtual bool is_pointer_type() const noexcept override final { return true; }
 
@@ -138,7 +138,7 @@ public:
 
     inline virtual std::size_t size() const & noexcept override final { return sizeof(void *); }
     inline virtual std::align_val_t align() const & noexcept override final { return std::align_val_t(alignof(void *)); }
-    using Type::name;
+    using Type::type_name;
 
     inline virtual bool is_left_reference_type() const noexcept override final { return true; }
 
@@ -155,7 +155,7 @@ public:
 
     inline virtual std::size_t size() const & noexcept override final { return sizeof(void *); }
     inline virtual std::align_val_t align() const & noexcept override final { return std::align_val_t(alignof(void *)); }
-    using Type::name;
+    using Type::type_name;
 
     inline virtual bool is_right_reference_type() const noexcept override final { return true; }
 
@@ -172,7 +172,7 @@ public:
 
     inline virtual std::size_t size() const & noexcept override final { return __baseType->size() * __arraySize; }
     inline virtual std::align_val_t align() const & noexcept override final { return __baseType->align(); }
-    using Type::name;
+    using Type::type_name;
 
     inline virtual bool is_array_type() const noexcept override final { return true; }
 
@@ -184,11 +184,11 @@ private:
     std::shared_ptr<Type> __originalType;
 
 public:
-    inline TypeAlias(TypeName && _name, const std::shared_ptr<Type> _originalType) noexcept : Type(std::move(_name)), __originalType(_originalType) {}
+    inline TypeAlias(TypeName && _typeName, const std::shared_ptr<Type> _originalType) noexcept : Type(std::move(_typeName)), __originalType(_originalType) {}
 
     inline virtual std::size_t size() const & noexcept override final { return __originalType->size(); }
     inline virtual std::align_val_t align() const & noexcept override final { return __originalType->align(); }
-    using Type::name;
+    using Type::type_name;
 
     inline virtual bool is_type_alias() const noexcept override final { return true; }
 

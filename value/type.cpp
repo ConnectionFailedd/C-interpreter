@@ -16,11 +16,11 @@ Types::Type::TypeMultiSet Types::Type::TypeMultiSet::init() {
 }
 
 std::shared_ptr<Types::Type> Types::Type::TypeMultiSet::find(const UnconfirmedName & _key) {
-    auto keyType = std::make_shared<Type>(Scope::NOSCOPE, _key.base_name());
+    auto keyType = std::make_shared<Type>(TypeName(Scope::NOSCOPE, _key.base_name()));
 
     auto equalRange = __typeMultiSet.equal_range(keyType);
     for(auto begin = equalRange.first, end = equalRange.second; begin != end; begin++) {
-        if((*begin)->name() == _key) return *begin;
+        if((*begin)->type_name() == _key) return *begin;
     }
 
     return NOTYPE;

@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "name.hpp"
+#include "scope.hpp"
 #include "type.hpp"
 #include "value.hpp"
 
@@ -24,7 +25,10 @@ class SyntaxTree;
 class Function {
 public:
     using FunctionName = Name;
+
 public:
+    class UnconfirmedSignature;
+
     class Signature {
     private:
         FunctionName __functionName;
@@ -37,7 +41,28 @@ public:
         Signature(const FunctionName & _functionName, const std::shared_ptr<Types::Type> & _returnType, const std::vector<std::shared_ptr<Types::Type>> & _argumentTypes) : __functionName(_functionName), __returnType(_returnType), __argumentTypes(_argumentTypes) {}
         Signature(FunctionName && _functionName, const std::shared_ptr<Types::Type> & _returnType, const std::vector<std::shared_ptr<Types::Type>> & _argumentTypes) : __functionName(std::move(_functionName)), __returnType(_returnType), __argumentTypes(_argumentTypes) {}
 
-        bool operator<(const Signature & _rhs) const & noexcept { return __functionName < _rhs.__functionName; }
+        inline const FunctionName & function_name() const & noexcept { return __functionName; }
+        inline const std::shared_ptr<Types::Type> & return_type() const & noexcept { return __returnType; }
+        inline const std::vector<std::shared_ptr<Types::Type>> & argument_types() const & noexcept { return __argumentTypes; }
+
+        inline bool operator<(const Signature & _rhs) const & noexcept { return __functionName < _rhs.__functionName; }
+        bool operator==(const UnconfirmedSignature &) const & noexcept;
+    };
+
+    class UnconfirmedSignature {
+    private:
+        UnconfirmedName __functionName;
+        std::shared_ptr<Types::Type> __returnType;
+        std::vector<std::shared_ptr<Types::Type>> __argumentTypes;
+
+    public:
+        UnconfirmedSignature(const UnconfirmedName & _functionName, const std::shared_ptr<Types::Type> & _returnType, const std::vector<std::shared_ptr<Types::Type>> & _argumentTypes) : __functionName(_functionName), __returnType(_returnType), __argumentTypes(_argumentTypes) {}
+
+        inline const UnconfirmedName & function_name() const & noexcept { return __functionName; }
+        inline const std::shared_ptr<Types::Type> & return_type() const & noexcept { return __returnType; }
+        inline const std::vector<std::shared_ptr<Types::Type>> & argument_types() const & noexcept { return __argumentTypes; }
+
+        inline bool operator==(const Signature & _rhs) const & noexcept { return _rhs == *this; }
     };
 
 private:
@@ -47,6 +72,8 @@ public:
     inline Function() : __functionSignature(Name::NONAME) {}
     inline Function(const Signature & _functionSignature) : __functionSignature(_functionSignature) {}
     inline Function(Signature && _functionSignature) : __functionSignature(std::move(_functionSignature)) {}
+
+    inline virtual const Signature & function_signature() const & noexcept { return __functionSignature; }
 
     inline virtual std::shared_ptr<Value> execute() const { return Value::NOVALUE; }
 
@@ -75,14 +102,7 @@ public:
 
         inline void insert(const std::shared_ptr<Function> & _src) { __functionMultiSet.insert(_src); }
         inline void insert(std::shared_ptr<Function> && _src) { __functionMultiSet.insert(std::move(_src)); }
-        inline std::shared_ptr<Function> find(std::string && _functionName) {
-            // should be rewritten
-            auto iter = __functionMultiSet.find(std::make_shared<Function>(FunctionName(std::move(_functionName))));
-            if(iter != __functionMultiSet.end()) {
-                return * iter;
-            }
-            return NOFUNCTION;
-        }
+        std::shared_ptr<Function> find(const UnconfirmedSignature &);
     };
 
     static FunctionMultiSet functionMultiSet;
@@ -133,6 +153,8 @@ public:
     inline UserDefinedFunction(const Signature & _functionSignature, const std::shared_ptr<SyntaxTree> & _functionBody) : Function(_functionSignature), __functionBody(_functionBody) {}
     inline UserDefinedFunction(Signature && _functionSignature, const std::shared_ptr<SyntaxTree> & _functionBody) : Function(std::move(_functionSignature)), __functionBody(_functionBody) {}
 
+    using Function::function_signature;
+
     virtual std::shared_ptr<Value> execute() const override final;
 
     using Function::operator<;
@@ -151,6 +173,8 @@ public:
     inline BuiltInFunction(const Signature & _functionSignature, BuiltInFunctionType _functionBody) : Function(_functionSignature), __functionBody(std::make_shared<std::function<BuiltInFunctionType>>(_functionBody)) {}
     inline BuiltInFunction(Signature && _functionSignature, BuiltInFunctionType _functionBody) : Function(std::move(_functionSignature)), __functionBody(std::make_shared<std::function<BuiltInFunctionType>>(_functionBody)) {}
 
+    using Function::function_signature;
+
     inline virtual std::shared_ptr<Value>execute() const override final { return __functionBody->operator()(); }
 
     using Function::operator<;
@@ -158,6 +182,10 @@ public:
 public:
     template<class _T>
     static BuiltInFunctionType add;
+
+    template<class _T>
+    static BuiltInFunctionType assign;
+
 };
 
 // namespace BuiltInFunctions {

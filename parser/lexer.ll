@@ -8,7 +8,7 @@
 
 %{
     namespace CINT::PreProcess {
-    CINT::PreProcess::Parser::symbol_type make_INTEGER(const char *, const CINT::PreProcess::Parser::location_type &);
+    CINT::PreProcess::Parser::symbol_type make_INT_LITERAL(const char *, const CINT::PreProcess::Parser::location_type &);
     }
 %}
 
@@ -32,9 +32,15 @@
                 location.step();
             }
 
-"+"         { return CINT::PreProcess::Parser::make_PLUS(location); }
+"int"       { return CINT::PreProcess::Parser::make_INT_TYPE(location); }
 
-[0-9]+      { return CINT::PreProcess::make_INTEGER(yytext, location); }
+[_a-zA-Z][_a-zA-Z0-9]* { return CINT::PreProcess::Parser::make_IDENTIFIER(yytext, location); }
+
+"="         { return CINT::PreProcess::Parser::make_ASSIGN(location); }
+"+"         { return CINT::PreProcess::Parser::make_PLUS(location); }
+";"         { return CINT::PreProcess::Parser::make_SEMICOLON(location); }
+
+[0-9]+      { return CINT::PreProcess::make_INT_LITERAL(yytext, location); }
 
 .           { throw CINT::PreProcess::Parser::syntax_error(location, "invalid character: " + std::string(yytext)); }
 <<EOF>>     { return CINT::PreProcess::Parser::make_YYEOF(location); }
@@ -43,12 +49,12 @@
 
 namespace CINT::PreProcess {
 
-CINT::PreProcess::Parser::symbol_type make_INTEGER(const char * _str, const CINT::PreProcess::Parser::location_type& location) {
-    auto int_type = CINT::Types::Type::typeMultiSet.find("int");
+CINT::PreProcess::Parser::symbol_type make_INT_LITERAL(const char * _str, const CINT::PreProcess::Parser::location_type& location) {
+    auto int_type = CINT::Types::Type::typeMultiSet.find(UnconfirmedName("int"));
     auto value = std::make_shared<CINT::Value>(int_type, false, false);
     value->set_value<int>(std::stol(_str));
     auto fixedValueNode = CINT::SyntaxTree::make_fixed_value_node(value);
-    return CINT::PreProcess::Parser::make_INTEGER(fixedValueNode, location);
+    return CINT::PreProcess::Parser::make_INT_LITERAL(fixedValueNode, location);
 }
 
 }

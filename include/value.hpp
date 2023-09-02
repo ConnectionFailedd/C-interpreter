@@ -3,6 +3,7 @@
 
 #include <map>
 #include <memory>
+#include <ostream>
 #include <type_traits>
 
 #include "type.hpp"
@@ -15,6 +16,7 @@ namespace CINT {
 
 class Value {
     friend class SubValue;
+
 private:
     std::shared_ptr<Types::Type> __type;
 
@@ -48,6 +50,8 @@ public:
     inline void set_value(T _src) const {
         *(T *)(__valuePointer) = _src;
     }
+
+    friend std::ostream & operator<<(std::ostream &, const Value &);
 
 public:
     const static std::shared_ptr<Value> NOVALUE;

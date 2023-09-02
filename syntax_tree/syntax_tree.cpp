@@ -68,7 +68,7 @@ std::shared_ptr<Value> SyntaxTree::ForNode::evaluate() {
 
 std::shared_ptr<Value> SyntaxTree::SemicolonNode::evaluate() {
     auto res = __previousExpression->evaluate();
-    if(Function::functionStack.break_signal() || Function::functionStack.continue_signal() || Function::functionStack.return_signal()) {
+    if(Function::functionStack.break_signal() || Function::functionStack.continue_signal() || Function::functionStack.return_signal() || __nextSemicolon == nullptr) {
         return res;
     }
 

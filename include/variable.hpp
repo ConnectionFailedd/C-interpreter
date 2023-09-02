@@ -37,15 +37,16 @@ public:
         };
 
     private:
-        std::multiset<std::shared_ptr<Variable>, SharedPtrVariableCmp> __globalVaribaleMultiSet;
+        std::multiset<std::shared_ptr<Variable>, SharedPtrVariableCmp> __globalVariableMultiSet;
 
     public:
-        inline GlobalVariableMultiSet(std::multiset<std::shared_ptr<Variable>, SharedPtrVariableCmp> && _globalVaribaleMultiSet) : __globalVaribaleMultiSet(std::move(_globalVaribaleMultiSet)) {}
+        inline GlobalVariableMultiSet(std::multiset<std::shared_ptr<Variable>, SharedPtrVariableCmp> && _globalVariableMultiSet) : __globalVariableMultiSet(std::move(_globalVariableMultiSet)) {}
 
         static GlobalVariableMultiSet init();
 
-        inline void insert(const std::shared_ptr<Variable> & _src) { __globalVaribaleMultiSet.insert(_src); }
-        inline void insert(std::shared_ptr<Variable> && _src) { __globalVaribaleMultiSet.insert(std::move(_src)); }
+        inline void insert(const std::shared_ptr<Variable> & _src) { __globalVariableMultiSet.insert(_src); }
+        inline void insert(std::shared_ptr<Variable> && _src) { __globalVariableMultiSet.insert(std::move(_src)); }
+        std::shared_ptr<Variable> find(const UnconfirmedName & _key);
     };
 
 public:

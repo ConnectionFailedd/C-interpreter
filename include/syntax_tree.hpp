@@ -128,6 +128,8 @@ public:
     public:
         inline SemicolonNode(const std::shared_ptr<Node> & _previousExpression, const std::shared_ptr<Node> & _nextSemicolon) : __previousExpression(_previousExpression), __nextSemicolon(_nextSemicolon) {}
 
+        inline void set_next_semicolon(const std::shared_ptr<Node> & _nextSemicolon) { __nextSemicolon = _nextSemicolon; }
+
         virtual std::shared_ptr<Value> evaluate() override final;
     };
 
@@ -169,7 +171,6 @@ public:
     inline static std::shared_ptr<Node> make_semicolon_node(const std::shared_ptr<Node> & _previousExpression, const std::shared_ptr<Node> & _nextSemicolon) {
         return std::make_shared<SemicolonNode>(SemicolonNode(_previousExpression, _nextSemicolon));
     }
-
 };
 
 /* ---------------------------------------------------------------------------------------------------- */
