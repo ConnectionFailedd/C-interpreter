@@ -1,14 +1,8 @@
-#include "driver.hpp"
-#include "function.hpp"
 #include "name.hpp"
-#include "parser.hpp"
-#include "scope.hpp"
-#include "syntax_tree.hpp"
-#include "type.hpp"
-#include "value.hpp"
 #include <functional>
 #include <memory>
 #include <new>
+#include <string>
 #include <vector>
 
 int main(int argc, char * argv[]) {
@@ -34,8 +28,15 @@ int main(int argc, char * argv[]) {
     // tree.evaluate();
     // int returnValue = CINT::SyntaxTree::functionStack.get_return_value()->get_value<int>();
     // return 0;
-    CINT::PreProcess::Driver driver;
-    driver.parse("test.txt");
+
+
+    // CINT::PreProcess::Driver driver;
+    // driver.parse("test.txt");
     // std::cout << driver.location << std::endl;
-    return 0;
+    // return 0;
+    auto name = CINT::Name("");
+    auto name_str = std::string(name);
+    auto a = std::make_shared<const int>(2);
+    auto b = std::shared_ptr<int>();
+    a=b;
 }

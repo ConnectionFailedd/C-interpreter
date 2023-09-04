@@ -12,46 +12,22 @@
 
 namespace CINT {
 
-bool Function::Signature::operator==(const UnconfirmedSignature & _rhs) const & noexcept {
-    return __functionName == _rhs.function_name() && __returnType == return_type() && __argumentTypes == argument_types();
-}
-
-std::shared_ptr<Value> UserDefinedFunction::execute() const { return __functionBody->evaluate(); }
-
-Function::FunctionMultiSet Function::FunctionMultiSet::init() {
-    auto res = std::multiset<std::shared_ptr<Function>, SharedPtrFunctionCmp>();
-
-    auto int_type = Types::Type::typeMultiSet.find(UnconfirmedName("int"));
-    res.insert(std::make_shared<BuiltInFunction>(Signature(FunctionName(Scope::GLOBAL_SCOPE, "+"), int_type, {int_type, int_type}), BuiltInFunction::add<int>));
-    res.insert(std::make_shared<BuiltInFunction>(Signature(FunctionName(Scope::GLOBAL_SCOPE, "="), int_type, {int_type, int_type}), BuiltInFunction::assign<int>));
-
-    return res;
-}
-std::shared_ptr<Function> Function::FunctionMultiSet::find(const UnconfirmedSignature & _key) {
-    auto keyFunction = std::make_shared<Function>(Signature(FunctionName(Scope::NOSCOPE, _key.function_name().base_name())));
-    auto equalRange = __functionMultiSet.equal_range(keyFunction);
-    for(auto begin = equalRange.first, end = equalRange.second; begin != end; begin++) {
-        if((*begin)->function_signature() == _key) {
-            return *begin;
-        }
-    }
-    return NOFUNCTION;
-}
+std::shared_ptr<const Value> UserDefinedFunction::execute() const { return __functionBody->evaluate(); }
 
 template<class _T>
-std::shared_ptr<Value> BuiltInFunction::add() {
-    auto lhs = functionStack.arguments()[0]->get_value<_T>();
-    auto rhs = functionStack.arguments()[1]->get_value<_T>();
+std::shared_ptr<const Value> BuiltInFunction::add() {
+    auto lhs = functionStack.arguments()[0]->get_value_as<_T>();
+    auto rhs = functionStack.arguments()[1]->get_value_as<_T>();
     auto res = lhs + rhs;
     auto returnValue = std::make_shared<Value>(Value(functionStack.arguments()[0]->type(), false, false));
-    returnValue->set_value<_T>(res);
+    returnValue->set_value_as<_T>(res);
     return returnValue;
 }
 
 template<class _T>
-std::shared_ptr<Value> BuiltInFunction::assign() {
-    auto rhs = functionStack.arguments()[1]->get_value<_T>();
-    functionStack.arguments()[0]->set_value<_T>(rhs);
+std::shared_ptr<const Value> BuiltInFunction::assign() {
+    auto rhs = functionStack.arguments()[1]->get_value_as<_T>();
+    functionStack.arguments()[0]->set_value_as<_T>(rhs);
     return functionStack.arguments()[0];
 }
 
