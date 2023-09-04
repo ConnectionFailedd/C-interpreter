@@ -14,23 +14,15 @@
 
 namespace CINT {
 
-auto Scope::currentScopeStack = std::vector<std::shared_ptr<Scope>>({std::make_shared<Scope>()});
-const auto Scope::NOSCOPE = std::make_shared<Scope>(std::vector<std::string>());
-const auto Scope::GLOBAL_SCOPE = currentScopeStack[0];
-auto Scope::scopeMultiSet = ScopeMultiSet::init();
+const auto Type::NOTYPE = std::make_shared<const Type>(Type::TypeName(""));
 
-const auto Name::NONAME = Name(Scope::NOSCOPE, "");
+const auto Value::NOVALUE = std::make_shared<const Value>(Value(Type::NOTYPE, true, false));
 
-const auto Types::Type::NOTYPE = std::make_shared<Type>();
-auto Types::Type::typeMultiSet = Type::TypeMultiSet::init();
+const auto Variable::NOVARIABLE = std::make_shared<const Variable>(VariableName(""), Value::NOVALUE);
 
-const auto Value::NOVALUE = std::make_shared<Value>(Value(Types::Type::NOTYPE, true, false));
-
-const auto Variable::NOVARIABLE = std::make_shared<Variable>(Name::NONAME, Value::NOVALUE);
-auto Variable::globalVaribaleMultiSet = Variable::GlobalVariableMultiSet::init();
-
-const auto Function::NOFUNCTION = std::make_shared<Function>();
+const auto Function::NOFUNCTION = std::make_shared<const Function>(Function::Signature(""));
 auto Function::functionStack = FunctionStack();
-auto Function::functionMultiSet = Function::FunctionMultiSet::init();
 
+auto Scope::currentScopeStack = std::vector<std::shared_ptr<Scope>>({std::make_shared<Scope>(Scope::ScopeName(__GLOBAL_SCOPE_NAME__))});
+const auto Scope::NOSCOPE = std::make_shared<Scope>("");
 } // namespace CINT
