@@ -1,4 +1,5 @@
 #include "name.hpp"
+#include "driver.hpp"
 #include <functional>
 #include <memory>
 #include <new>
@@ -30,13 +31,8 @@ int main(int argc, char * argv[]) {
     // return 0;
 
 
-    // CINT::PreProcess::Driver driver;
-    // driver.parse("test.txt");
-    // std::cout << driver.location << std::endl;
-    // return 0;
-    auto name = CINT::Name("");
-    auto name_str = std::string(name);
-    auto a = std::make_shared<const int>(2);
-    auto b = std::shared_ptr<int>();
-    a=b;
+    CINT::PreProcess::Driver driver;
+    driver.parse("test.txt");
+    std::cout << driver.location << std::endl;
+    return 0;
 }

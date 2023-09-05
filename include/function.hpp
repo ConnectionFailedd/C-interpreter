@@ -20,6 +20,7 @@ namespace CINT {
 /* ---------------------------------------------------------------------------------------------------- */
 
 class SyntaxTree;
+class Scope;
 
 class Function {
 public:
@@ -94,11 +95,15 @@ public:
         private:
             std::vector<std::shared_ptr<const Value>> __arguments;
 
-        public:
-            inline Element(const std::vector<std::shared_ptr<const Value>> & _arguments) : __arguments(_arguments) {}
-            inline Element(std::vector<std::shared_ptr<const Value>> && _arguments) : __arguments(std::move(_arguments)) {}
+            std::vector<std::shared_ptr<Scope>> __localScopeStack;
+            std::stack<std::vector<std::shared_ptr<Scope>>> __localUsingScopesStack;
 
-            inline std::vector<std::shared_ptr<const Value>> & arguments() { return __arguments; }
+        public:
+            Element();
+
+            inline std::vector<std::shared_ptr<const Value>> & arguments() noexcept { return __arguments; }
+            inline std::vector<std::shared_ptr<Scope>> & local_scope_stack() noexcept { return __localScopeStack; }
+            inline std::stack<std::vector<std::shared_ptr<Scope>>> & local_using_scopes_stack() noexcept { return __localUsingScopesStack; }
         };
 
         std::stack<Element> __functionStack;
@@ -111,12 +116,14 @@ public:
         inline FunctionStack() : __functionStack() {}
 
         inline std::vector<std::shared_ptr<const Value>> & arguments() { return __functionStack.top().arguments(); }
+        inline std::vector<std::shared_ptr<Scope>> & local_scope_stack() noexcept { return __functionStack.top().local_scope_stack(); }
+        inline std::stack<std::vector<std::shared_ptr<Scope>>> & local_using_scopes_stack() noexcept { return __functionStack.top().local_using_scopes_stack(); }
 
         inline bool & break_signal() { return __breakSignal; }
         inline bool & continue_signal() { return __continueSignal; }
         inline bool & return_signal() { return __returnSignal; }
 
-        inline void push(std::vector<std::shared_ptr<const Value>> && _arguments) { return __functionStack.push(Element(std::move(_arguments))); }
+        inline void push() { return __functionStack.push(Element()); }
         inline void pop() { return __functionStack.pop(); }
     };
 

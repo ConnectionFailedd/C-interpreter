@@ -7,15 +7,9 @@
 %option noyywrap nounput noinput batch debug
 
 %{
-    namespace CINT::PreProcess {
-    CINT::PreProcess::Parser::symbol_type make_INT_LITERAL(const char *, const CINT::PreProcess::Parser::location_type &);
-    }
-%}
-
-
-%{
     // Code run each time a pattern is matched.
-    # define YY_USER_ACTION location.columns(yyleng);
+    # define YY_USER_ACTION
+    // location.columns(yyleng);
 %}
 
 %%
@@ -46,103 +40,63 @@
 
 [_a-zA-Z][_a-zA-Z0-9]* { return CINT::PreProcess::Parser::make_IDENTIFIER(yytext, location); }
 
-"::"
-"++"
-"--"
-"("
-")"
-"{"
-"}"
-"["
-"]"
-"."
-"->"
+"<<="       { return CINT::PreProcess::Parser::make_SHIFT_LEFT_ASSIGN(location); }
+">>="       { return CINT::PreProcess::Parser::make_SHIFT_RIGHT_ASSIGN(location); }
+"&&"        { return CINT::PreProcess::Parser::make_LOGIC_AND(location); }
+"||"        { return CINT::PreProcess::Parser::make_LOGIC_OR(location); }
+"::"        { return CINT::PreProcess::Parser::make_SCOPE(location); }
+"++"        { return CINT::PreProcess::Parser::make_INCERMENT(location); }
+"--"        { return CINT::PreProcess::Parser::make_DECREMENT(location); }
+"->"        { return CINT::PreProcess::Parser::make_ARROW(location); }
+"<<"        { return CINT::PreProcess::Parser::make_SHIFT_LEFT(location); }
+">>"        { return CINT::PreProcess::Parser::make_SHIFT_RIGHT(location); }
+"<="        { return CINT::PreProcess::Parser::make_LESS_EQUAL(location); }
+">="        { return CINT::PreProcess::Parser::make_GREATER_EQUAL(location); }
+"=="        { return CINT::PreProcess::Parser::make_EQUAL(location); }
+"!="        { return CINT::PreProcess::Parser::make_NOT_EQUAL(location); }
+"+="        { return CINT::PreProcess::Parser::make_ADD_ASSIGN(location); }
+"-="        { return CINT::PreProcess::Parser::make_SUB_ASSIGN(location); }
+"*="        { return CINT::PreProcess::Parser::make_MUL_ASSIGN(location); }
+"/="        { return CINT::PreProcess::Parser::make_DIV_ASSIGN(location); }
+"%="        { return CINT::PreProcess::Parser::make_MOD_ASSIGN(location); }
+"&="        { return CINT::PreProcess::Parser::make_AND_ASSIGN(location); }
+"^="        { return CINT::PreProcess::Parser::make_XOR_ASSIGN(location); }
+"|="        { return CINT::PreProcess::Parser::make_OR_ASSIGN(location); }
+"("         { return CINT::PreProcess::Parser::make_LPAREN(location); }
+")"         { return CINT::PreProcess::Parser::make_RPAREN(location); }
+"]"         { return CINT::PreProcess::Parser::make_LBRACKET(location); }
+"["         { return CINT::PreProcess::Parser::make_RBRACKET(location); }
+"{"         { return CINT::PreProcess::Parser::make_LBRACE(location); }
+"}"         { return CINT::PreProcess::Parser::make_RBRACE(location); }
+"."         { return CINT::PreProcess::Parser::make_DOT(location); }
 "+"         { return CINT::PreProcess::Parser::make_PLUS(location); }
 "-"         { return CINT::PreProcess::Parser::make_MINUS(location); }
-"!"
-"~"
-"*"
-"&"
-"/"
-"%"
-"+"
-"-"
-"<<"
-">>"
-"<"
-"<="
-">"
-">="
-"=="
-"!="
-"^"
-"|"
-"&&"
-"||"
-"?"
-":"
+"!"         { return CINT::PreProcess::Parser::make_LOGIC_NOT(location); }
+"~"         { return CINT::PreProcess::Parser::make_BITWISE_NOT(location); }
+"*"         { return CINT::PreProcess::Parser::make_MULTIPLY(location); }
+"&"         { return CINT::PreProcess::Parser::make_BITWISE_AND(location); }
+"/"         { return CINT::PreProcess::Parser::make_DIVIDE(location); }
+"%"         { return CINT::PreProcess::Parser::make_MOD(location); }
+"<"         { return CINT::PreProcess::Parser::make_LESS(location); }
+">"         { return CINT::PreProcess::Parser::make_GREATER(location); }
+"^"         { return CINT::PreProcess::Parser::make_BITWISE_XOR(location); }
+"|"         { return CINT::PreProcess::Parser::make_BITWISE_OR(location); }
+"?"         { return CINT::PreProcess::Parser::make_CONDITION1(location); }
+":"         { return CINT::PreProcess::Parser::make_CONDITION2(location); }
 "="         { return CINT::PreProcess::Parser::make_ASSIGN(location); }
-"+="
-"-="
-"*="
-"/="
-"%="
-"<<="
-">>="
-"&="
-"^="
-"|="
-","
+","         { return CINT::PreProcess::Parser::make_COMMA(location); }
 
-"'"
-"\""
-
+"'"         { return CINT::PreProcess::Parser::make_SINGLE_QUOTATION(location); }
+"\""        { return CINT::PreProcess::Parser::make_DOUBLE_QUOTATION(location); }
 ";"         { return CINT::PreProcess::Parser::make_SEMICOLON(location); }
 
-0
-[1-9][0-9]*
-0[1-9]+
-0[xX][0-9a-fA-F]+
-0[bB][01]+
-
-0[uU]
-[1-9][0-9]*[uU]
-0[1-9]+[uU]
-0[xX][0-9a-fA-F]+[uU]
-0[bB][01]+[uU]
-
-0[lL]
-[1-9][0-9]*[lL]
-0[1-9]+[lL]
-0[xX][0-9a-fA-F]+[lL]
-0[bB][01]+[lL]
-
-0[uU][lL]|0[lL][uU]
-[1-9][0-9]*[uU][lL]|[1-9][0-9]*[lL][uU]
-0[1-9]+[uU][lL]|[1-9][0-9]*[lL][uU]
-0[xX][0-9a-fA-F]+[uU][lL]|[1-9][0-9]*[lL][uU]
-0[bB][01]+[uU][lL]|[1-9][0-9]*[lL][uU]
-
-'[^'\\\n]'
-'\\['"\\abfnrtv]'
-'\\[0-7]+'
-'\\x[0-9a-fA-F]+'
-
-\"([^\"\\\n]|(\\['\"\\abfnrtv])|\\[0-7]+|\\x[0-9a-fA-F]+)+\"
+[1-9][0-9]* |
+0[1-9]+ |
+0[xX][0-9a-fA-F]+ |
+0[bB][01]+ |
+0           { return CINT::PreProcess::Parser::make_INT_LITERAL(yytext, location); }
 
 .           { throw CINT::PreProcess::Parser::syntax_error(location, "invalid character: " + std::string(yytext)); }
 <<EOF>>     { return CINT::PreProcess::Parser::make_YYEOF(location); }
 
 %%
-
-namespace CINT::PreProcess {
-
-CINT::PreProcess::Parser::symbol_type make_INT_LITERAL(const char * _str, const CINT::PreProcess::Parser::location_type& location) {
-    auto int_type = CINT::Types::Type::typeMultiSet.find(UnconfirmedName("int"));
-    auto value = std::make_shared<CINT::Value>(int_type, false, false);
-    value->set_value<int>(std::stol(_str));
-    auto fixedValueNode = CINT::SyntaxTree::make_fixed_value_node(value);
-    return CINT::PreProcess::Parser::make_INT_LITERAL(fixedValueNode, location);
-}
-
-}

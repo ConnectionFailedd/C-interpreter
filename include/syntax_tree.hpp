@@ -9,6 +9,7 @@
 
 #include "function.hpp"
 #include "value.hpp"
+#include "variable.hpp"
 
 /* ---------------------------------------------------------------------------------------------------- */
 
@@ -41,6 +42,27 @@ public:
         inline ArgumentNode(std::size_t _index) : __index(_index) {}
 
         inline virtual std::shared_ptr<const Value> evaluate() const override final { return Function::functionStack.arguments()[__index]; }
+    };
+
+    class LocalVariableCreateNode : public Node {
+    private:
+        Variable::VariableName __variableName;
+        std::shared_ptr<const Value> __initValue;
+
+    public:
+        inline LocalVariableCreateNode(const Variable::VariableName & _variableName, const std::shared_ptr<const Value> _initValue) : __variableName(_variableName), __initValue(_initValue) {}
+
+        virtual std::shared_ptr<const Value> evaluate() const override final;
+    };
+
+    class LocalVariableNode : public Node {
+    private:
+        Variable::VariableName __variableName;
+
+    public:
+        inline LocalVariableNode(const Variable::VariableName & _variableName) : __variableName(_variableName) {}
+
+        virtual std::shared_ptr<const Value> evaluate() const override final;
     };
 
     class FunctionNode : public Node {
@@ -141,34 +163,40 @@ public:
 
     inline std::shared_ptr<const Value> evaluate() const { return __root->evaluate(); }
 
-    inline static std::shared_ptr<const Node> make_fixed_value_node(const std::shared_ptr<const Value> & _value) {
+    inline static std::shared_ptr<Node> make_fixed_value_node(const std::shared_ptr<const Value> & _value) {
         return std::make_shared<FixedValueNode>(FixedValueNode(_value));
     }
-    inline static std::shared_ptr<const Node> make_argument_node(std::size_t _index) {
+    inline static std::shared_ptr<Node> make_argument_node(std::size_t _index) {
         return std::make_shared<ArgumentNode>(ArgumentNode(_index));
     }
-    inline static std::shared_ptr<const Node> make_function_node(const std::shared_ptr<const Function> & _function, const std::vector<std::shared_ptr<const Node>> _arguments) {
+    inline static std::shared_ptr<Node> make_local_variable_create_node(const Variable::VariableName & _variableName, const std::shared_ptr<const Value> & _value) {
+        return std::make_shared<LocalVariableCreateNode>(LocalVariableCreateNode(_variableName, _value));
+    }
+    inline static std::shared_ptr<Node> make_local_variable_node(const Variable::VariableName & _variableName) {
+        return std::make_shared<LocalVariableNode>(LocalVariableNode(_variableName));
+    }
+    inline static std::shared_ptr<Node> make_function_node(const std::shared_ptr<const Function> & _function, const std::vector<std::shared_ptr<const Node>> _arguments) {
         return std::make_shared<FunctionNode>(FunctionNode(_function, _arguments));
     }
-    inline static std::shared_ptr<const Node> make_if_node(const std::shared_ptr<const Node> & _condition, const std::shared_ptr<const Node> & _trueBranch, const std::shared_ptr<const Node> & _falseBranch) {
+    inline static std::shared_ptr<Node> make_if_node(const std::shared_ptr<const Node> & _condition, const std::shared_ptr<const Node> & _trueBranch, const std::shared_ptr<const Node> & _falseBranch) {
         return std::make_shared<IfNode>(IfNode(_condition, _trueBranch, _falseBranch));
     }
-    inline static std::shared_ptr<const Node> make_while_node(const std::shared_ptr<const Node> & _condition, const std::shared_ptr<const Node> & _trueBranch, const std::shared_ptr<const Node> & _falseBranch) {
+    inline static std::shared_ptr<Node> make_while_node(const std::shared_ptr<const Node> & _condition, const std::shared_ptr<const Node> & _trueBranch, const std::shared_ptr<const Node> & _falseBranch) {
         return std::make_shared<WhileNode>(WhileNode(_condition, _trueBranch, _falseBranch));
     }
-    inline static std::shared_ptr<const Node> make_for_node(const std::shared_ptr<const Node> & _initialization, const std::shared_ptr<const Node> & _condition, const std::shared_ptr<const Node> & _increment, const std::shared_ptr<const Node> & _trueBranch, const std::shared_ptr<const Node> & _falseBranch) {
+    inline static std::shared_ptr<Node> make_for_node(const std::shared_ptr<const Node> & _initialization, const std::shared_ptr<const Node> & _condition, const std::shared_ptr<const Node> & _increment, const std::shared_ptr<const Node> & _trueBranch, const std::shared_ptr<const Node> & _falseBranch) {
         return std::make_shared<ForNode>(ForNode(_initialization, _condition, _increment, _trueBranch, _falseBranch));
     }
-    inline static std::shared_ptr<const Node> make_break_node() {
+    inline static std::shared_ptr<Node> make_break_node() {
         return std::make_shared<BreakNode>(BreakNode());
     }
-    inline static std::shared_ptr<const Node> make_continue_node() {
+    inline static std::shared_ptr<Node> make_continue_node() {
         return std::make_shared<ContinueNode>(ContinueNode());
     }
-    inline static std::shared_ptr<const Node> make_return_node(const std::shared_ptr<const Node> & _returnValue) {
+    inline static std::shared_ptr<Node> make_return_node(const std::shared_ptr<const Node> & _returnValue) {
         return std::make_shared<ReturnNode>(ReturnNode(_returnValue));
     }
-    inline static std::shared_ptr<const Node> make_semicolon_node(const std::shared_ptr<const Node> & _previousExpression, const std::shared_ptr<const Node> & _nextSemicolon) {
+    inline static std::shared_ptr<Node> make_semicolon_node(const std::shared_ptr<const Node> & _previousExpression, const std::shared_ptr<const Node> & _nextSemicolon) {
         return std::make_shared<SemicolonNode>(SemicolonNode(_previousExpression, _nextSemicolon));
     }
 };

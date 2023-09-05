@@ -2,14 +2,31 @@
 #include <vector>
 
 #include "function.hpp"
+#include "scope.hpp"
 #include "syntax_tree.hpp"
 #include "type.hpp"
 #include "value.hpp"
+#include "variable.hpp"
 
 namespace CINT {
 
+std::shared_ptr<const Value> SyntaxTree::LocalVariableCreateNode::evaluate() const {
+    Function::functionStack.local_scope_stack().back()->varibale_set().insert(std::make_shared<Variable>(Variable(__variableName, __initValue)));
+    return Value::NOVALUE;
+}
+
+std::shared_ptr<const Value> SyntaxTree::LocalVariableNode::evaluate() const {
+    for(auto riter = Function::functionStack.local_scope_stack().rbegin(); riter != Function::functionStack.local_scope_stack().rend(); riter++) {
+        auto res = (*riter)->varibale_set().find(__variableName);
+        if(res != Variable::NOVARIABLE) {
+            return res->value();
+        }
+    }
+    return Value::NOVALUE;
+}
+
 std::shared_ptr<const Value> SyntaxTree::FunctionNode::evaluate() const {
-    Function::functionStack.push({});
+    Function::functionStack.push();
     for(auto argument : __arguments) {
         Function::functionStack.arguments().push_back(argument->evaluate());
     }

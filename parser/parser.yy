@@ -13,6 +13,7 @@
 #include "function.hpp"
 #include "value.hpp"
 #include "variable.hpp"
+#include "scope.hpp"
 #include "syntax_tree.hpp"
 namespace CINT {
 namespace PreProcess {
@@ -39,97 +40,23 @@ class Driver;
 
 %define api.token.prefix {TOK_}
 
-%token <std::string> CHAR_TYPE SHORT_TYPE INT_TYPE FLOAT_TYPE DOUBLE_TYPE;
+%token <std::string> VOID_TYPE CHAR_TYPE SHORT_TYPE INT_TYPE FLOAT_TYPE DOUBLE_TYPE;
 %token <std::string> LONG UNSIGNED CONST;
-%nterm <std::string> type_specifier basic_type_specifier;
-
-%token PLUS ASSIGN SEMICOLON;
 
 %token <std::string> IDENTIFIER;
-%token <std::shared_ptr<CINT::SyntaxTree::Node>> INT_LITERAL;
-%nterm <std::shared_ptr<CINT::SyntaxTree::Node>> program statements statement expression declaration definition term;
+
+%token SHIFT_LEFT_ASSIGN SHIFT_RIGHT_ASSIGN LOGIC_AND LOGIC_OR SCOPE INCERMENT DECREMENT ARROW SHIFT_LEFT SHIFT_RIGHT LESS_EQUAL GREATER_EQUAL EQUAL NOT_EQUAL ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE DOT PLUS MINUS LOGIC_NOT BITWISE_NOT MULTIPLY BITWISE_AND DIVIDE MOD LESS GREATER BITWISE_XOR BITWISE_OR CONDITION1 CONDITION2 ASSIGN COMMA SINGLE_QUOTATION DOUBLE_QUOTATION SEMICOLON;
+
+%token <std::string> INT_LITERAL;
+
+%nterm <std::string> program;
 
 %%
 %start program;
 program:
-    expression { std::cout << * $1->evaluate() << std::endl; }
-|   declaration { std::cout << * $1->evaluate() << std::endl; }
-|   definition { std::cout << * $1->evaluate() << std::endl; }
-|   statements { std::cout << * $1->evaluate() << std::endl; };
-
-statements:
-    statement statements {
-        $$ = $1;
-        dynamic_cast<CINT::SyntaxTree::SemicolonNode *>($1.get())->set_next_semicolon($2);
-    }
-|   statement { $$ = $1; };
-
-statement:
-    expression SEMICOLON { $$ = CINT::SyntaxTree::make_semicolon_node($1, nullptr); }
-|   declaration SEMICOLON { $$ = CINT::SyntaxTree::make_semicolon_node($1, nullptr); }
-|   definition SEMICOLON { $$ = CINT::SyntaxTree::make_semicolon_node($1, nullptr); };
-
-expression:
-    term { $$ = $1; }
-|   expression PLUS term {
-        auto int_type = Types::Type::typeMultiSet.find(UnconfirmedName("int"));
-        $$ = CINT::SyntaxTree::make_function_node(CINT::Function::functionMultiSet.find(Function::UnconfirmedSignature(UnconfirmedName("+"), int_type, {int_type, int_type})), {$1, $3});
-    };
-
-term:
-    INT_LITERAL { $$ = $1; }
-|   IDENTIFIER { $$ = CINT::SyntaxTree::make_fixed_value_node(Variable::globalVaribaleMultiSet.find(UnconfirmedName($1))->value()); };
-
-declaration:
-    type_specifier IDENTIFIER {
-        auto int_type = Types::Type::typeMultiSet.find(UnconfirmedName($1));
-        auto value = std::make_shared<Value>(int_type, false, true);
-        Variable::globalVaribaleMultiSet.insert(std::make_shared<Variable>(Variable::VariableName(Scope::currentScopeStack.back(), $2), value));
-        $$ = CINT::SyntaxTree::make_fixed_value_node(value);
-    }
-|   CONST type_specifier IDENTIFIER {
-        auto int_type = Types::Type::typeMultiSet.find(UnconfirmedName($1));
-        auto value = std::make_shared<Value>(int_type, true, true);
-        Variable::globalVaribaleMultiSet.insert(std::make_shared<Variable>(Variable::VariableName(Scope::currentScopeStack.back(), $3), value));
-        $$ = CINT::SyntaxTree::make_fixed_value_node(value);
-    };
-
-definition:
-    type_specifier IDENTIFIER ASSIGN expression {
-        auto int_type = Types::Type::typeMultiSet.find(UnconfirmedName($1));
-        auto value = std::make_shared<Value>(int_type, false, true);
-        Variable::globalVaribaleMultiSet.insert(std::make_shared<Variable>(Variable::VariableName(Scope::currentScopeStack.back(), $2), value));
-        auto valueNode = CINT::SyntaxTree::make_fixed_value_node(value);
-        $$ = CINT::SyntaxTree::make_function_node(CINT::Function::functionMultiSet.find(Function::UnconfirmedSignature(UnconfirmedName("="), int_type, {int_type, int_type})), {valueNode, $4});
-    };
-|   CONST type_specifier IDENTIFIER ASSIGN expression {
-        auto int_type = Types::Type::typeMultiSet.find(UnconfirmedName($1));
-        auto value = std::make_shared<Value>(int_type, true, true);
-        Variable::globalVaribaleMultiSet.insert(std::make_shared<Variable>(Variable::VariableName(Scope::currentScopeStack.back(), $3), value));
-        auto valueNode = CINT::SyntaxTree::make_fixed_value_node(value);
-        $$ = CINT::SyntaxTree::make_function_node(CINT::Function::functionMultiSet.find(Function::UnconfirmedSignature(UnconfirmedName("="), int_type, {int_type, int_type})), {valueNode, $5});
-    };
-
-type_specifier:
-    basic_type_specifier { $$ = $1; }
-|   IDENTIFIER { $$ = $1; };
-
-basic_type_specifier:
-    CHAR_TYPE { $$ = std::move($1); }
-|   UNSIGNED CHAR_TYPE { $$ = "unsigned char"; }
-|   SHORT_TYPE { $$ = $1; }
-|   UNSIGNED SHORT_TYPE { $$ = "unsigned short"; }
-|   INT_TYPE { $$ = $1; }
-|   UNSIGNED { $$ = $1; }
-|   LONG { $$ = $1; }
-|   UNSIGNED LONG { $$ = "unsigned long"; }
-|   LONG LONG { $$ = "long long"; }
-|   UNSIGNED LONG LONG { $$ = "unsigned long long"; }
-|   FLOAT_TYPE { $$ = $1; }
-|   DOUBLE_TYPE { $$ = $1; }
-|   LONG DOUBLE_TYPE { $$ = "long double"; };
-
+    INT_LITERAL { std::cout << "INT_LITERAL" << std::endl; };
 %%
+
 void
 CINT::PreProcess::Parser::error (const location_type& l, const std::string& m)
 {

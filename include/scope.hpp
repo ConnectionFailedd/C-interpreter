@@ -73,8 +73,8 @@ public:
 public:
     static const std::shared_ptr<Scope> NOSCOPE;
 
-    static std::vector<std::shared_ptr<Scope>> currentScopeStack;
-    static std::vector<std::shared_ptr<Scope>> globalUsingScopes;
+    static std::vector<std::shared_ptr<Scope>> globalScopeStack;
+    static std::stack<std::vector<std::shared_ptr<Scope>>> globalUsingScopesStack;
 };
 
 /* ---------------------------------------------------------------------------------------------------- */

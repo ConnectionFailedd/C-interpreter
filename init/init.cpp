@@ -2,6 +2,7 @@
 #include <memory>
 #include <new>
 #include <set>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -23,6 +24,7 @@ const auto Variable::NOVARIABLE = std::make_shared<const Variable>(VariableName(
 const auto Function::NOFUNCTION = std::make_shared<const Function>(Function::Signature(""));
 auto Function::functionStack = FunctionStack();
 
-auto Scope::currentScopeStack = std::vector<std::shared_ptr<Scope>>({std::make_shared<Scope>(Scope::ScopeName(__GLOBAL_SCOPE_NAME__))});
+auto Scope::globalScopeStack = std::vector<std::shared_ptr<Scope>>({std::make_shared<Scope>(Scope::ScopeName(__GLOBAL_SCOPE_NAME__))});
+auto Scope::globalUsingScopesStack = std::stack<std::vector<std::shared_ptr<Scope>>>();
 const auto Scope::NOSCOPE = std::make_shared<Scope>("");
 } // namespace CINT
