@@ -13,8 +13,8 @@
 namespace CINT {
 
 Function::FunctionStack::Element::Element() : __arguments(), __localScopeStack(), __localUsingScopesStack() {
-                __localScopeStack.push_back(std::make_shared<Scope>(Scope::ScopeName("")));
-            }
+    __localScopeStack.push_back(std::make_shared<Scope>(Scope::ScopeName("")));
+}
 
 std::shared_ptr<const Value> UserDefinedFunction::execute() const { return __functionBody->evaluate(); }
 
