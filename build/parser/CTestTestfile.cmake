@@ -1,0 +1,6 @@
+# CMake generated Testfile for 
+# Source directory: /Users/__NYA__/Desktop/C-interpreter/parser
+# Build directory: /Users/__NYA__/Desktop/C-interpreter/build/parser
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.

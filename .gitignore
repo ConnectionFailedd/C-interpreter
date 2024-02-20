@@ -1,9 +1,4 @@
 build
 .cache
 .vscode
-location.hpp
-parser.hpp
-lexer.cpp
-parser.cpp
-.DS_Store
-draft
+code.sh

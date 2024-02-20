@@ -1,27 +1,17 @@
 cmake_minimum_required(VERSION 3.6.0)
 project(CINT VERSION 0.1.0)
 
-include(CTest)
-enable_testing()
-
 add_executable(CINT main.cpp)
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+include_directories(frontend)
+include_directories(ir)
+include_directories(backend)
+include_directories(symbol_table)
+include_directories(any)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -std=c++17 -g")
+add_subdirectory(frontend)
+add_subdirectory(ir)
+add_subdirectory(backend)
+add_subdirectory(symbol_table)
 
-include_directories(include)
-add_subdirectory(parser)
-add_subdirectory(parser_cpp)
-add_subdirectory(utils)
-add_subdirectory(value)
-add_subdirectory(syntax_tree)
-add_subdirectory(function)
-add_subdirectory(init)
-
-target_link_libraries(CINT PARSER)
-target_link_libraries(CINT UTILS SYNTAX_TREE INIT)
-target_link_libraries(CINT VALUE FUNCTION)
+target_link_libraries(CINT FRONTEND IR BACKEND SYMBOL_TABLE)

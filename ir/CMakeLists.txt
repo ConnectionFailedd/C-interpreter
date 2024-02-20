@@ -1,0 +1,1 @@
+add_library(IR function_signature.cpp function.cpp syntax_tree.cpp type.cpp)

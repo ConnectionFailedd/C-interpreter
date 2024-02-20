@@ -1,0 +1,1 @@
+add_library(SYMBOL_TABLE symbol_table.cpp)
